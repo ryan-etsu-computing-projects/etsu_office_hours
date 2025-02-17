@@ -1,3 +1,5 @@
+# Database migrations
+migrations/*
 # Virtual environments
 .venv
 venv

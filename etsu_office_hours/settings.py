@@ -20,10 +20,13 @@ INSTALLED_APPS = [
     'encrypted_model_fields',
     'crispy_forms',
     'users',
-    'profiles',
+    'profiles.apps.ProfilesConfig', # Custom config for profiles app to include the create_missing_profiles command for Django signals
 ]
 
 AUTH_USER_MODEL = 'users.EncryptedUser'
+
+LOGIN_REDIRECT_URL = '/'  # This is a fallback. We should go to /profile/<pk>/
+LOGIN_URL = 'users:login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -40,7 +43,7 @@ ROOT_URLCONF = 'etsu_office_hours.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [ BASE_DIR / 'templates' ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -67,6 +70,14 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'haasrr@outlook.com'
 EMAIL_HOST_PASSWORD = 'xsmtpsib-d67776953d2f28af237d934718b5531104071d395097381ced28c9f15720bc17-5D4yMT2Kmx0P9GFY'
+
+# Static files (CSS, JavaScript, Images)
+
+STATIC_URL = '/static/'
+STATIC_ROOT = '/static'
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
+
 
 # File upload settings
 MEDIA_URL = '/media/'

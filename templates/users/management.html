@@ -1,0 +1,90 @@
+{% extends '../base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>User Management</h2>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group">
+                <a href="{% url 'users:create_user' %}" class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i> Add Single User
+                </a>
+                <a href="{% url 'users:upload_csv' %}" class="btn btn-primary">
+                    <i class="bi bi-upload"></i> Bulk Upload CSV
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive" style="min-height: 50vh;">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Last Login</th>
+                            <th>Account Age</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            {% with days_since_login=user.last_login|timesince:now %}
+                            <tr class="{% if not user.is_active %}table-danger{% elif days_since_login > 360 %}table-warning{% elif days_since_login > 120 %}table-info{% endif %}">
+                                <td>{{ user.get_full_name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ user.is_active|yesno:"Active,Inactive" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if user.last_login %}
+                                        {{ user.last_login|date:"M d, Y" }}
+                                        <small class="text-muted">({{ user.last_login|timesince }} ago)</small>
+                                    {% else %}
+                                        Never
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ user.date_joined|timesince }}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" 
+                                                data-bs-toggle="dropdown">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <form method="post" action="{% url 'users:toggle_active' user.id %}" 
+                                                      class="dropdown-item">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-link text-decoration-none p-0">
+                                                        {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'admin:users_encrypteduser_change' user.id %}">
+                                                    Edit in Admin
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

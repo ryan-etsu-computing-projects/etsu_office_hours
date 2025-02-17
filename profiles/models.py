@@ -46,11 +46,32 @@ class OfficeHours(models.Model):
     semester = models.CharField(max_length=20, choices=get_semester_choices())
     scheduling_link = models.URLField(blank=True)
     is_public = models.BooleanField(default=True)
+    time_slots = models.JSONField(default=list)  # Add this field
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def get_formatted_time_slots(self):
+        """Return time slots in a formatted way for display"""
+        return sorted(self.time_slots, key=lambda x: (
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].index(x.get('day', '')),
+            x.get('startTime', '')
+        ))
+    
+    class Meta:
+        verbose_name_plural = 'Office hours'
 
 class CourseOfficeHours(models.Model):
     office_hours = models.ForeignKey(OfficeHours, on_delete=models.CASCADE)
     course_name = models.CharField(max_length=100)
     course_description = models.TextField(blank=True)
-    time_slots = models.JSONField()  # Store time slots as structured JSON
+    time_slots = models.JSONField(default=list)
+
+    def __str__(self):
+        return f"{self.course_name} - {self.office_hours.user.email}"
+
+    def get_formatted_time_slots(self):
+        """Return time slots in a formatted way for display"""
+        return sorted(self.time_slots, key=lambda x: (
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].index(x.get('day', '')),
+            x.get('startTime', '')
+        ))

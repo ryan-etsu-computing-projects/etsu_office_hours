@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to ETSU Office Hours System</h2>
+        <p>Hello {{ user.first_name }},</p>
+        <p>Your account has been created in the ETSU Office Hours System. To get started, please set your password using the link below:</p>
+        <p>
+            <a href="{{ password_reset_url }}" class="btn">Set Password</a>
+        </p>
+        <p>For security purposes, this link will expire in 24 hours.</p>
+        <p>Your temporary password is: <strong>{{ password }}</strong></p>
+        <p>Please change this password immediately after logging in.</p>
+        <p>Best regards,<br>ETSU Computing Department</p>
+    </div>
+</body>
+</html>

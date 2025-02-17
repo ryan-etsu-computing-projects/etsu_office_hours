@@ -1,0 +1,66 @@
+{% extends '../base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>ETSU Faculty & Staff Directory</h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="input-group">
+            <input type="text" class="form-control search" placeholder="Search by name, department, or college...">
+            <button class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="profiles-list">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 list">
+        {% for profile in profiles %}
+            <div class="col">
+                <div class="card h-100">
+                    {% if profile.profile_image %}
+                        <img src="{{ profile.profile_image.url }}" class="card-img-top" alt="{{ profile.user.get_full_name }}">
+                    {% else %}
+                        <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-person-circle" style="font-size: 4rem;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {% if profile.title %}{{ profile.title }} {% endif %}
+                            {{ profile.user.get_full_name }}
+                        </h5>
+                        {% if profile.pronouns %}
+                            <p class="card-text text-muted">{{ profile.pronouns }}</p>
+                        {% endif %}
+                        <p class="card-text">
+                            <a href="mailto:{{ profile.user.email }}" class="text-decoration-none">
+                                <i class="bi bi-envelope"></i> {{ profile.user.email }}
+                            </a>
+                        </p>
+                        <a href="{% url 'profiles:profile_detail' profile.pk %}" class="btn btn-primary">View Profile</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var options = {
+    valueNames: [
+        'card-title',
+        { data: ['department', 'college'] }
+    ]
+};
+var profilesList = new List('profiles-list', options);
+</script>
+{% endblock %}

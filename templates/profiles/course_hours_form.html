@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">{{ action }} Course Office Hours</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                    <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            {% if field.name == 'time_slots' %}
+                                <div id="timeSlotsContainer">
+                                    <input type="hidden" name="time_slots" id="timeSlotsInput" value="[]">
+                                    <div class="time-slot-container">
+                                        <!-- Time slots will be added here dynamically -->
+                                    </div>
+                                    <button type="button" class="btn btn-secondary mt-2" id="addTimeSlot">
+                                        <i class="bi bi-plus-circle"></i> Add Time Slot
+                                    </button>
+                                </div>
+                            {% else %}
+                                {{ field|add_class:"form-control" }}
+                            {% endif %}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="alert alert-danger">
+                                    {{ field.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="{% url 'profiles:profile_detail' user.userprofile.pk %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.time-slot-container');
+    const addButton = document.getElementById('addTimeSlot');
+    const timeSlotInput = document.getElementById('timeSlotsInput');
+    let timeSlots = [];
+
+    // Try to load existing time slots
+    try {
+        timeSlots = JSON.parse(timeSlotInput.value || '[]');
+    } catch (e) {
+        console.error('Error parsing time slots:', e);
+        timeSlots = [];
+    }
+
+    function updateTimeSlots() {
+        timeSlotInput.value = JSON.stringify(timeSlots);
+        console.log('Updated time slots:', timeSlots);
+    }
+
+    function validateTimeRange(startTime, endTime) {
+        if (!startTime || !endTime) return true; // Allow empty values
+        return startTime < endTime;
+    }
+
+    function formatTime(timeStr) {
+        if (!timeStr) return '';
+        const [hours, minutes] = timeStr.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours), parseInt(minutes));
+        return date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+        });
+    }
+
+    function createTimeSlotElement(slot, index) {
+        const slotDiv = document.createElement('div');
+        slotDiv.className = 'time-slot mb-2 p-2 border rounded';
+        slotDiv.innerHTML = `
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <select class="form-select day-select">
+                        <option value="Monday" ${slot.day === 'Monday' ? 'selected' : ''}>Monday</option>
+                        <option value="Tuesday" ${slot.day === 'Tuesday' ? 'selected' : ''}>Tuesday</option>
+                        <option value="Wednesday" ${slot.day === 'Wednesday' ? 'selected' : ''}>Wednesday</option>
+                        <option value="Thursday" ${slot.day === 'Thursday' ? 'selected' : ''}>Thursday</option>
+                        <option value="Friday" ${slot.day === 'Friday' ? 'selected' : ''}>Friday</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text">From</span>
+                        <input type="time" class="form-control start-time" value="${slot.startTime || '09:00'}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text">To</span>
+                        <input type="time" class="form-control end-time" value="${slot.endTime || '10:00'}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <span class="formatted-time small text-muted"></span>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-danger btn-sm delete-slot">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        const daySelect = slotDiv.querySelector('.day-select');
+        const startTimeInput = slotDiv.querySelector('.start-time');
+        const endTimeInput = slotDiv.querySelector('.end-time');
+        const deleteButton = slotDiv.querySelector('.delete-slot');
+        const formattedTimeSpan = slotDiv.querySelector('.formatted-time');
+
+        function updateFormattedTime() {
+            const start = formatTime(startTimeInput.value);
+            const end = formatTime(endTimeInput.value);
+            formattedTimeSpan.textContent = `${start} - ${end}`;
+        }
+
+        function updateTimeSlotData() {
+            const startTime = startTimeInput.value;
+            const endTime = endTimeInput.value;
+            
+            if (!validateTimeRange(startTime, endTime)) {
+                alert('End time must be after start time');
+                endTimeInput.value = startTime;
+                return;
+            }
+
+            timeSlots[index] = {
+                day: daySelect.value,
+                startTime: startTime,
+                endTime: endTime
+            };
+            updateTimeSlots();
+            updateFormattedTime();
+        }
+
+        daySelect.addEventListener('change', updateTimeSlotData);
+        startTimeInput.addEventListener('change', updateTimeSlotData);
+        endTimeInput.addEventListener('change', updateTimeSlotData);
+
+        deleteButton.addEventListener('click', () => {
+            timeSlots.splice(index, 1);
+            updateTimeSlots();
+            renderTimeSlots();
+        });
+
+        // Initial formatted time display
+        updateFormattedTime();
+
+        return slotDiv;
+    }
+
+    function renderTimeSlots() {
+        container.innerHTML = '';
+        timeSlots.forEach((slot, index) => {
+            const slotElement = createTimeSlotElement(slot, index);
+            container.appendChild(slotElement);
+        });
+    }
+
+    addButton.addEventListener('click', () => {
+        timeSlots.push({
+            day: 'Monday',
+            startTime: '09:00',
+            endTime: '10:00'
+        });
+        updateTimeSlots();
+        renderTimeSlots();
+    });
+
+    // Initial render
+    renderTimeSlots();
+});
+</script>
+{% endblock %}

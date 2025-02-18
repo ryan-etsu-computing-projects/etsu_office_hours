@@ -180,7 +180,14 @@ def office_hours_edit(request):
             messages.success(request, 'Office hours updated successfully')
             return redirect('profiles:profile_detail', pk=request.user.userprofile.pk)
     else:
-        form = OfficeHoursForm(instance=office_hours)
+        # Prepare initial data safely handling missing time_slots
+        initial_data = {
+            'semester': office_hours.semester,
+            'scheduling_link': office_hours.scheduling_link,
+            'is_public': office_hours.is_public,
+            'time_slots': json.dumps(office_hours.time_slots or []) # Time slots optional
+        }
+        form = OfficeHoursForm(instance=office_hours, initial=initial_data)
     
     return render(request, 'profiles/office_hours_edit.html', {'form': form})
 

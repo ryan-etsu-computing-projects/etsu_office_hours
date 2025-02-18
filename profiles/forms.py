@@ -79,6 +79,9 @@ class OfficeHoursForm(forms.ModelForm):
     def clean_time_slots(self):
         try:
             time_slots = self.cleaned_data.get('time_slots', '[]')
+            if not time_slots:
+                return []
+
             if isinstance(time_slots, str):
                 time_slots = json.loads(time_slots)
             if not isinstance(time_slots, list):
@@ -112,7 +115,7 @@ class OfficeHoursForm(forms.ModelForm):
             return time_slots
             
         except json.JSONDecodeError:
-            raise ValidationError("Invalid time slot format")
+            return []  # Return empty list for invalid JSON
     
 class CourseOfficeHoursForm(forms.ModelForm):
     """Form for managing course-specific office hours."""

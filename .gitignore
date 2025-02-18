@@ -1,5 +1,7 @@
 # Database migrations
 migrations/*
+# Stupid folder that appears with images for some reason
+.comments
 # Virtual environments
 .venv
 venv

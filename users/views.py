@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import Group
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import logout
 from django.contrib import messages
@@ -43,6 +44,15 @@ def create_user(request):
             user, password = form.save()
             messages.success(request, f'User account created for {user.email}')
 
+            # Set classification
+            classification = form.cleaned_data['classification'].lower()
+            if classification == 'faculty':
+                group, _created = Group.objects.get_or_create(name='Faculty')
+            else:
+                group, _created = Group.objects.get_or_create(name='Staff')
+            user.groups.add(group)
+            user.save()
+
             # Generate password reset token
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -64,6 +74,7 @@ def create_user(request):
             html_message = render_to_string('users/email/welcome.html', context)
             plain_message = strip_tags(html_message)
 
+            '''
             send_mail(
                 'Welcome to ETSU Office Hours System',
                 plain_message,
@@ -72,6 +83,7 @@ def create_user(request):
                 html_message=html_message,
                 fail_silently=False,
             )
+            '''
 
             return redirect('users:manage')
     else:
@@ -89,6 +101,7 @@ def toggle_active(request, user_id):
         status = 'activated' if user.is_active else 'deactivated'
         messages.success(request, f'User {user.email} has been {status}')
     return redirect('users:manage')
+
 
 @user_passes_test(is_admin)
 def upload_csv(request):
@@ -111,6 +124,15 @@ def upload_csv(request):
                         last_name=row['last_name'],
                         password=password
                     )
+
+                    # Set classification
+                    classification = row['classification'].lower()
+                    if classification == 'faculty':
+                        group, _created = Group.objects.get_or_create(name='Faculty')
+                    else:
+                        group, _created = Group.objects.get_or_create(name='Staff')
+                    user.groups.add(group)
+                    user.save()
                     
                     # Create associated profile
                     profile = UserProfile.objects.create(user=user)

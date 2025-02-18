@@ -15,8 +15,16 @@ def home(request):
     # Start with all profiles
     profiles_list = UserProfile.objects.select_related('user').all()
 
-    # Get search query if present
+    # Get filter parameters if present
+    classification_filter = request.GET.get('classification', '')
+    sort_direction = request.GET.get('sort', 'asc')  # Default to ascending
     search_query = request.GET.get('search', '').strip()
+
+    # Apply classification filter if specified
+    if classification_filter in ['Faculty', 'Staff']:
+        profiles_list = profiles_list.filter(
+            user__groups__name=classification_filter
+        )
 
     if search_query:
         # Log the search query for debugging
@@ -106,11 +114,20 @@ def home(request):
                 profiles_list = filtered_profiles
                 logger.debug(f"Python filtering found {len(filtered_profiles)} results")
 
+
     # Convert to list if it's a queryset
     if hasattr(profiles_list, 'all'):
         profiles_count = profiles_list.count()
+        # Apply sorting
+        if sort_direction == 'desc':
+            profiles_list = profiles_list.order_by('-user__first_name')
+            logger.debug('Results sorted descending')
+        else:  # asc
+            profiles_list = profiles_list.order_by('user__first_name')
+            logger.debug('Results sorted ascending')
         profiles_list = list(profiles_list)
     else:
+        logger.warning('Unable to sort the results because they are not a queryset')
         profiles_count = len(profiles_list)
 
     # Number of profiles per page
@@ -151,17 +168,25 @@ def profile_detail(request, pk):
 @login_required
 def profile_edit(request):
     profile = request.user.userprofile
+    old_image_path = None
+    
+    # Store the path to the old image if it exists
+    if profile.profile_image:
+        old_image_path = profile.profile_image.path if hasattr(profile.profile_image, 'path') else None
+    
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            # Handle image processing if a new image was uploaded
-            if 'profile_image' in request.FILES:
-                # Delete old image if one exists (to prevent accumulation)
-                if profile.profile_image:
-                    # Check if file exists before trying to delete
-                    if os.path.isfile(profile.profile_image.path):
-                        os.remove(profile.profile_image.path)
-
+            # Handle the case where the user is changing their profile image
+            if 'profile_image' in request.FILES and old_image_path and os.path.isfile(old_image_path):
+                try:
+                    # Delete the old file manually as a backup
+                    os.remove(old_image_path)
+                except Exception as e:
+                    # Log the error but continue with saving the form
+                    print(f"Error removing old profile image: {e}")
+            
+            # Save the form with new data
             form.save()
             messages.success(request, 'Profile updated successfully')
             return redirect('profiles:profile_detail', pk=profile.pk)

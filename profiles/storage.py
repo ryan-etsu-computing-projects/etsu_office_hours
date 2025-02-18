@@ -5,11 +5,17 @@ import os
 
 class OverwriteStorage(FileSystemStorage):
     def get_available_name(self, name, max_length=None):
-        """Returns a filename that's free on the target storage system.
-
-        If the file already exists, it will delete it first.
         """
-        # If the filename already exists, remove it
+        If the file with name already exists, delete it first.
+        Then return the name to use for saving the new file.
+        """
+        # Check if the file exists on disk
         if self.exists(name):
-            os.remove(os.path.join(settings.MEDIA_ROOT, name))
+            file_path = os.path.join(settings.MEDIA_ROOT, name)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+                
         return name

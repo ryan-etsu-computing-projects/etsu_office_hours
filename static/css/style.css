@@ -1,30 +1,199 @@
-.bttn-add {
-    background-color: hsl(134, 32%, 43%)!important;
+:root{
+    --clr-primary: 225, 44%, 34%;
+    --clr-primary-hover: 225, 51%, 44%;
+    --clr-secondary: 201, 34%, 40%;
+    --clr-secondary-hover: 201, 51%, 40%;
+    --clr-info: 209, 50%, 50%;
+    --clr-create: 171, 34%, 40%;
+    --clr-create-hover: 171, 25%, 40%;
+    --clr-spring-wood: 51, 30%, 95%;
+    --clr-snow: 0, 20%, 98%;
+    --clr-putty-yellow: 48, 62%, 71%;
+    --clr-putty-yellow-hover: 48, 53%, 68%;
+}
+
+.bg-primary {
+    background-color: hsl(var(--clr-primary))!important;
+}
+
+.bg-info {
+    background-color: hsl(var(--clr-info))!important;
+}
+
+.bg-putty-yellow {
+    background-color: hsl(var(--clr-putty-yellow))!important;
+}
+
+.bttn-create {
+    background-color: hsl(var(--clr-create))!important;
     color: white!important;
 }
 
-.bttn-add:hover {
-    background-color: hsl(134, 41%, 43%)!important;
+.bttn-create:hover {
+    background-color: hsl(var(--clr-create-hover))!important;
     color: white!important;
     font-weight: 500;
 }
 
 .bttn-edit {
-    background-color: hsl(48, 62%, 71%)!important;
+    background-color: hsl(var(--clr-secondary))!important;
+    color: white!important;
 }
 
 .bttn-edit:hover {
-    background-color: hsl(48, 53%, 68%)!important;
+    background-color: hsl(var(--clr-secondary-hover))!important;
+    color: white!important;
     font-weight: 500;
 }
 
+.bttn-outline-edit {
+    background-color: none;
+    border: 1px solid hsl(var(--clr-secondary))!important;
+    color: hsl(var(--clr-secondary))!important;
+    color: #212529!important;
+    font-weight: 500!important;
+}
+
+.bttn-outline-edit:hover {
+    background-color: hsl(var(--clr-secondary))!important;
+    border: hsl(var(--clr-secondary-hover))!important;
+    color: white!important;
+    font-weight: 500!important;
+}
+
 .bttn-primary {
-    background-color: hsl(225, 44%, 34%)!important;
+    background-color: hsl(var(--clr-primary))!important;
     color: white!important;
 }
 
 .bttn-primary:hover {
-    background-color: hsl(225, 51%, 44%)!important;
+    background-color: hsl(var(--clr-primary-hover))!important;
     color: white!important;
     font-weight: 500;
+}
+
+.bttn-warning {
+    background-color: hsl(var(--clr-putty-yellow))!important;
+    color: #212529!important;
+}
+
+.bttn-warning:hover {
+    background-color: hsl(var(--clr-putty-yellow-hover))!important;
+    color: #212529!important;
+    font-weight: 500;
+}
+
+input[type=text], input[type=password], input[type=email], input[type=url] {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: hsl(var(--clr-snow));
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+select, textarea {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: hsl(var(--clr-snow));
+    box-sizing: border-box;
+    resize: vertical;
+}
+  
+/* Enlarge the checkbox to make it more easily clickable. */
+input[type=checkbox] {
+    width: 2em;
+    height: 2em;
+    vertical-align: middle;
+}
+
+label, .forms-label {
+    color: #666;
+    padding: 5px 2px 2px 2px;
+    display: inline-block;
+    font-size: 1.1rem;
+}
+
+.form-container {
+    border-radius: 10px;
+    background-color: white;
+    padding: 20px;
+    margin: 4vh auto 0;
+    border: 1px solid #ccc;
+    word-wrap: break-word;
+}
+
+.login-container {
+    margin: 80px auto 0;
+    border: 1px solid #ccc;
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    max-width: 1076px;
+    width: 70%;
+    background-color: rgba(228, 228, 228, 0.2);
+    border-radius: 10px;
+}
+
+.button-container {
+    border-radius: 10px;
+    background-color: rgba(228, 228, 228, 0.2);
+    padding: 16px 16px 0px 16px;
+    margin: 4vh auto 0;
+    border: 1px dotted #ccc;
+    word-wrap: break-word;
+}
+
+.password-reveal-wrapper {
+    margin-top: -2em;
+    width: min-content!important;
+    cursor: pointer;
+}
+
+.tos-box {
+    display: block;
+    padding: 1em;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    max-width: 800px;
+}
+
+/* Floating column for labels: 25% width */
+.col-25 {
+    float: left;
+    width: 25%;
+    margin-top: 6px;
+}
+
+/* Floating column for left-aligned buttons: 50% width */
+.col-50 {
+    float: left;
+    width: 50%;
+    margin-top: 6px;
+}
+
+/* Floating column for inputs: 75% width */
+.col-75 {
+    float: left;
+    width: 75%;
+    margin-top: 6px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* When the screen is less than 600px wide, make the two columns stack on top of each other */
+@media screen and (max-width: 600px) {
+    .col-25, .col-75, input[type=submit] {
+        width: 100%;
+        margin-top: 0;
+    }
 }

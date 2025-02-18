@@ -12,13 +12,20 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .btn {
+        .bttn {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
+            background-color: #43897f!important;
+            color: white !important;
             text-decoration: none;
             border-radius: 5px;
+            font-weight: normal;
+            margin: 20px 0;
+        }
+        .bttn:hover {
+            background-color: #4d8078!important;
+            color: white!important;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -28,7 +35,7 @@
         <p>Hello {{ user.first_name }},</p>
         <p>Your account has been created in the ETSU Office Hours System. To get started, please set your password using the link below:</p>
         <p>
-            <a href="{{ password_reset_url }}" class="btn">Set Password</a>
+            <a href="{{ password_reset_url }}" class="bttn">Set Password</a>
         </p>
         <p>For security purposes, this link will expire in 24 hours.</p>
         <p>Your temporary password is: <strong>{{ password }}</strong></p>

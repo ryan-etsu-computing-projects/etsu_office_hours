@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-8 offset-md-2">
+    <div class="col-md-8 offset-md-2 mb-4">
         <div class="card">
             <div class="card-body">
                 <h3 class="card-title">Create New User</h3>
@@ -28,9 +28,13 @@
                             {% endif %}
                         </div>
                     {% endfor %}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Create User</button>
-                        <a href="{% url 'users:manage' %}" class="btn btn-secondary">Cancel</a>
+                    <div class="button-container row">
+                        <div class="col-sm mb-3">
+                            <button type="submit" class="btn bttn-primary w-100">Create User</button>
+                        </div>
+                        <div class="col-sm mb-3">
+                            <a href="{% url 'users:manage' %}" class="btn bttn-warning w-100">Cancel</a>
+                        </div>
                     </div>
                 </form>
             </div>

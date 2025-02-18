@@ -3,7 +3,6 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordResetForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.utils.crypto import get_random_string
 from .models import EncryptedUser
 import csv
 import io
@@ -11,7 +10,16 @@ from profiles.models import UserProfile
 
 class UserWithProfileCreationForm(UserCreationForm):
     """Form for creating a new user with initial profile information."""
+
+    CLASSIFICATION_CHOICES = (
+        ('Faculty', 'Faculty'),
+        ('Staff', 'Staff'),
+    )
+
     # Profile fields
+    classification = forms.CharField(
+        widget=forms.Select(choices=CLASSIFICATION_CHOICES), label='Classification'
+    )
     honorific = forms.CharField(max_length=50, required=False, label='Title/Honorific (e.g., Dr., Prof., Mr., Ms.)')
     job_title = forms.CharField(max_length=100, required=False, label='Job Title')
     department = forms.CharField(max_length=100, required=False)
@@ -21,9 +29,13 @@ class UserWithProfileCreationForm(UserCreationForm):
 
     class Meta:
         model = EncryptedUser
-        fields = ('email', 'first_name', 'last_name', 'password1', 'password2',
-                 'honorific', 'job_title', 'department', 'college',
-                 'office_building', 'office_room')
+        fields = ('email', 'first_name', 'last_name', 'classification', 'honorific',
+                  'job_title', 'department', 'college', 'office_building', 'office_room')
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'password1' in self.fields: del self.fields['password1']
+        if 'password2' in self.fields: del self.fields['password2']
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
@@ -34,9 +46,11 @@ class UserWithProfileCreationForm(UserCreationForm):
         return email
 
     def save(self, commit=True):
-        user = super().save(commit=False)
+        # Calling forms.ModelForm contstructor instead of super().save(...) to bypass
+        # the UserCreationForm's save method entirely (requires password1)
+        user = super(forms.ModelForm, self).save(commit=False)
         # Generate a random password
-        temp_password = get_random_string(12)
+        temp_password = EncryptedUser.objects.make_random_password()
         user.set_password(temp_password)
 
         if commit:

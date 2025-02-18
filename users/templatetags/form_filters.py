@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from django import template
 import re
 
@@ -23,3 +24,11 @@ def remove_prepended_junk(field, junk_to_remove):
         return field[junk_len:].lstrip()
     else:
         return field
+
+@register.filter(name='has_group')
+def has_group(user, group_name):
+    try:
+        group = Group.objects.get(name=group_name)
+    except Group.DoesNotExist:
+        return False
+    return group in user.groups.all()

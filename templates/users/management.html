@@ -1,4 +1,5 @@
 {% extends '../base.html' %}
+{% load form_filters %}
 
 {% block content %}
 <div class="container">
@@ -8,10 +9,10 @@
         </div>
         <div class="col-auto">
             <div class="btn-group">
-                <a href="{% url 'users:create_user' %}" class="btn btn-primary">
+                <a href="{% url 'users:create_user' %}" class="btn bttn-create">
                     <i class="bi bi-person-plus"></i> Add Single User
                 </a>
-                <a href="{% url 'users:upload_csv' %}" class="btn btn-primary">
+                <a href="{% url 'users:upload_csv' %}" class="btn bttn-edit">
                     <i class="bi bi-upload"></i> Bulk Upload CSV
                 </a>
             </div>
@@ -26,6 +27,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Classification</th>
                             <th>Status</th>
                             <th>Last Login</th>
                             <th>Account Age</th>
@@ -38,6 +40,13 @@
                             <tr class="{% if not user.is_active %}table-danger{% elif days_since_login > 360 %}table-warning{% elif days_since_login > 120 %}table-info{% endif %}">
                                 <td>{{ user.get_full_name }}</td>
                                 <td>{{ user.email }}</td>
+                                <td>
+                                    {% if user|has_group:'Faculty' %}
+                                        Faculty
+                                    {% else %}
+                                        Staff
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <span class="badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
                                         {{ user.is_active|yesno:"Active,Inactive" }}

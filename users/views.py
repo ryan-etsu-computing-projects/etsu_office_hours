@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import logout
 from django.contrib import messages
 from django.utils import timezone
@@ -10,9 +11,11 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 import csv
 import io
-from .forms import EncryptedUserCreationForm, CSVUploadForm  # Changed from UserRegistrationForm
+from .forms import *
 from .models import EncryptedUser
 from profiles.models import UserProfile
 
@@ -35,17 +38,47 @@ def user_management(request):
 @user_passes_test(is_admin)
 def create_user(request):
     if request.method == 'POST':
-        form = EncryptedUserCreationForm(request.POST)
+        form = UserWithProfileCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            # Create associated profile
-            UserProfile.objects.create(user=user)
+            user, password = form.save()
             messages.success(request, f'User account created for {user.email}')
+
+            # Generate password reset token
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+            # Construct reset URL
+            reset_url = request.build_absolute_uri(
+                reverse('users:password_reset_confirm', kwargs={
+                    'uidb64': uid,
+                    'token': token
+                })
+            )
+
+            # Send welcome email with password reset link
+            context = {
+                'user': user,
+                'password': password,
+                'password_reset_url': reset_url
+            }
+            html_message = render_to_string('users/email/welcome.html', context)
+            plain_message = strip_tags(html_message)
+
+            send_mail(
+                'Welcome to ETSU Office Hours System',
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+
             return redirect('users:manage')
     else:
-        form = EncryptedUserCreationForm()
+        form = UserWithProfileCreationForm()
     
     return render(request, 'users/create_user.html', {'form': form})
+
 
 @user_passes_test(is_admin)
 def toggle_active(request, user_id):
@@ -80,12 +113,41 @@ def upload_csv(request):
                     )
                     
                     # Create associated profile
-                    UserProfile.objects.create(user=user)
+                    profile = UserProfile.objects.create(user=user)
+
+                    # Process optional profile fields
+                    if 'honorific' in row and row['honorific']:
+                        profile.honorific = row['honorific']
+                    if 'job_title' in row and row['job_title']:
+                        profile.job_title = row['job_title']
+                    if 'department' in row and row['department']:
+                        profile.department = row['department']
+                    if 'college' in row and row['college']:
+                        profile.college = row['college']
+                    if 'office_building' in row and row['office_building']:
+                        profile.office_building = row['office_building']
+                    if 'office_room' in row and row['office_room']:
+                        profile.office_room = row['office_room']
+
+                    profile.save()
+
+                    # Generate password reset token
+                    token = default_token_generator.make_token(user)
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
                     
+                    # Construct reset URL
+                    reset_url = request.build_absolute_uri(
+                        reverse('users:password_reset_confirm', kwargs={
+                            'uidb64': uid,
+                            'token': token
+                        })
+                    )
+
                     # Send welcome email with password reset link
                     context = {
                         'user': user,
                         'password': password,
+                        'password_reset_url': reset_url
                     }
                     html_message = render_to_string('users/email/welcome.html', context)
                     plain_message = strip_tags(html_message)

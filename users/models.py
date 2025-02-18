@@ -4,6 +4,8 @@ from django.db import models
 from encrypted_model_fields.fields import EncryptedCharField, EncryptedTextField
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+import random
+import string
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -19,6 +21,15 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
+
+    def make_random_password(self, length=12,
+                        allowed_chars=string.ascii_letters + string.digits + string.punctuation):
+        """
+        Generate a random password with the given length and allowed characters.
+        The default value of allowed_chars does not have "I" or "O" or letters
+        and digits that look similar -- just to avoid confusion.
+        """
+        return ''.join(random.choice(allowed_chars) for i in range(length))
 
 class EncryptedUser(AbstractUser):
     username = None
@@ -40,3 +51,4 @@ class EncryptedUser(AbstractUser):
         if not self.last_login:
             return False
         return (timezone.now() - self.last_login) > relativedelta(years=1)
+

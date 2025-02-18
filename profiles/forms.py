@@ -4,18 +4,25 @@ from datetime import datetime as dt
 from .models import UserProfile, OfficeHours, CourseOfficeHours
 from PIL import Image
 import json
-import logging
-
-logger = logging.getLogger(__name__)
 
 class ProfileForm(forms.ModelForm):
     """Form for editing user profile information."""
     class Meta:
         model = UserProfile
-        fields = ['title', 'preferred_name', 'pronouns', 'phone', 'bio', 'profile_image']
+        fields = ['honorific', 'preferred_name', 'pronouns', 'phone', 'bio', 'profile_image',
+                  'job_title', 'department', 'college', 'office_building', 'office_room']
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4}),
             'phone': forms.TextInput(attrs={'placeholder': '(123) 456-7890'}),
+        }
+        labels = {
+            'honorific': 'Title/Honorific (e.g., Dr., Professor, Mr., Ms.)',
+            'preferred_name': 'Preferred Name (include first and last)',
+            'job_title': 'Job Title (e.g., Assistant Professor, Lecturer)',
+            'college': 'College (e.g., College of Business and Technology)',
+            'department': 'Department (e.g., Department of Computing)',
+            'office_building': 'Office Building (e.g., Nicks Hall)',
+            'office_room': 'Office Room Number (e.g., 404)',
         }
 
     def clean_profile_image(self):
@@ -30,14 +37,7 @@ class ProfileForm(forms.ModelForm):
             # Check file size
             if image.size > 5 * 1024 * 1024:  # 5MB limit
                 raise ValidationError("Image file too large. Size should not exceed 5MB.")
-                
-            # Check dimensions
-            max_size = (800, 800)
-            if img.height > max_size[1] or img.width > max_size[0]:
-                raise ValidationError(
-                    f"Image too large. Maximum dimensions are {max_size[0]}x{max_size[1]} pixels."
-                )
-                
+
             # Verify it's an acceptable format
             if img.format.lower() not in ['jpeg', 'jpg', 'png']:
                 raise ValidationError(

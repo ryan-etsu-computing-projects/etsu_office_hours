@@ -1,16 +1,141 @@
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import models
 from .models import UserProfile, OfficeHours, CourseOfficeHours
 from .forms import ProfileForm, OfficeHoursForm, CourseOfficeHoursForm
-import json
 import logging
+import json
+import os
 
 logger = logging.getLogger(__name__)
 
 def home(request):
-    profiles = UserProfile.objects.select_related('user').all()
-    return render(request, 'profiles/home.html', {'profiles': profiles})
+    # Start with all profiles
+    profiles_list = UserProfile.objects.select_related('user').all()
+
+    # Get search query if present
+    search_query = request.GET.get('search', '').strip()
+
+    if search_query:
+        # Log the search query for debugging
+        logger.debug(f"Search query: '{search_query}'")
+
+        # Split query into tokens
+        tokens = [token.strip().lower() for token in search_query.split() if token.strip()]
+        logger.debug(f"Search tokens: {tokens}")
+
+        # If we have tokens, search each one
+        if tokens:
+            # Start with all profiles
+            token_results = profiles_list
+
+            # For each token, filter the results
+            for token in tokens:
+                # Create a filter for this token
+                token_filter = (
+                    # Unencrypted fields
+                    models.Q(user__first_name__icontains=token) |
+                    models.Q(user__last_name__icontains=token) |
+                    models.Q(user__email__icontains=token) |
+
+                    # Encrypted fields
+                    models.Q(job_title__icontains=token) |
+                    models.Q(department__icontains=token) |
+                    models.Q(college__icontains=token) |
+                    models.Q(honorific__icontains=token) |
+                    models.Q(preferred_name__icontains=token) |
+
+                    # Special cases for department/college
+                    models.Q(department__icontains=f"Department of {token}") |
+                    models.Q(college__icontains=f"College of {token}")
+                )
+
+                # Filter the results with this token
+                token_results = token_results.filter(token_filter)
+
+            # Use the filtered results
+            profiles_list = token_results.distinct()
+            logger.debug(f"Tokenized search found {profiles_list.count()} results")
+
+            # If no results from DB query, try Python filtering
+            if profiles_list.count() == 0:
+                logger.debug("No results from tokenized database query, trying Python filtering")
+                all_profiles = list(UserProfile.objects.select_related('user').all())
+                filtered_profiles = []
+
+                for profile in all_profiles:
+                    # For each profile, check if it matches all tokens
+                    matches_all_tokens = True
+
+                    for token in tokens:
+                        # Build a list of fields to check
+                        fields_to_check = [
+                            profile.user.first_name.lower(),
+                            profile.user.last_name.lower(),
+                            profile.user.email.lower(),
+                            getattr(profile, 'job_title', '').lower(),
+                            getattr(profile, 'department', '').lower(),
+                            getattr(profile, 'college', '').lower(),
+                            getattr(profile, 'honorific', '').lower(),
+                            getattr(profile, 'preferred_name', '').lower(),
+                        ]
+
+                        # Special cases for department/college
+                        department = getattr(profile, 'department', '').lower()
+                        if department:
+                            fields_to_check.append(department.replace('department of ', ''))
+
+                        college = getattr(profile, 'college', '').lower()
+                        if college:
+                            fields_to_check.append(college.replace('college of ', ''))
+
+                        # Check if any field matches this token
+                        token_match = any(token in field for field in fields_to_check if field)
+
+                        if not token_match:
+                            matches_all_tokens = False
+                            break
+
+                    # If the profile matches all tokens, add it to results
+                    if matches_all_tokens:
+                        filtered_profiles.append(profile)
+
+                # Use the Python-filtered results
+                profiles_list = filtered_profiles
+                logger.debug(f"Python filtering found {len(filtered_profiles)} results")
+
+    # Convert to list if it's a queryset
+    if hasattr(profiles_list, 'all'):
+        profiles_count = profiles_list.count()
+        profiles_list = list(profiles_list)
+    else:
+        profiles_count = len(profiles_list)
+
+    # Number of profiles per page
+    per_page = 12
+
+    # Create paginator instance
+    paginator = Paginator(profiles_list, per_page)
+
+    # Get page number from request
+    page = request.GET.get('page', 1)
+
+    try:
+        profiles = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        profiles = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page of results.
+        profiles = paginator.page(paginator.num_pages)
+
+    return render(request, 'profiles/home.html', {
+        'profiles': profiles,
+        'search_query': search_query,
+        'total_results': profiles_count,
+    })
 
 def profile_detail(request, pk):
     profile = get_object_or_404(UserProfile, pk=pk)
@@ -35,6 +160,14 @@ def profile_edit(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
+            # Handle image processing if a new image was uploaded
+            if 'profile_image' in request.FILES:
+                # Delete old image if one exists (to prevent accumulation)
+                if profile.profile_image:
+                    # Check if file exists before trying to delete
+                    if os.path.isfile(profile.profile_image.path):
+                        os.remove(profile.profile_image.path)
+
             form.save()
             messages.success(request, 'Profile updated successfully')
             return redirect('profiles:profile_detail', pk=profile.pk)

@@ -1,3 +1,4 @@
+# users/admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
@@ -20,13 +21,21 @@ class EncryptedUserAdmin(UserAdmin):
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     
-    # Override the add_fieldsets to remove username and use email
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'first_name', 'last_name', 'password1', 'password2'),
-        }),
-    )
+    # Removed this since we don't want users created through admin
+    # (need user profile created alongside and need email sent to user).
+    # The proper way to create a user is through the /users/manage/
+    # where the user will actually receive their account activation/password reset
+    # email once they are created.
+    #
+    # add_fieldsets = (
+    #     (None, {
+    #         'classes': ('wide',),
+    #         'fields': ('email', 'first_name', 'last_name', 'password1', 'password2'),
+    #     }),
+    # )
 
-    # Since we're using email instead of username
     readonly_fields = ['date_joined', 'last_login']
+
+    def has_add_permission(self, request):
+        """Prevent creating users through the admin interface."""
+        return False

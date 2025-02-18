@@ -1,4 +1,5 @@
 {% extends '../base.html' %}
+{% load form_filters %}
 
 {% block content %}
 <div class="row">
@@ -15,6 +16,15 @@
                         <li>first_name (required)</li>
                         <li>last_name (required)</li>
                         <li>classification (required: "Faculty" or "Staff")</li>
+                    </ul>
+                    <p>The CSV file may include the following optional columns:</p>
+                    <ul>
+                        <li>honorific (e.g., Dr., Prof., Mr., Ms.)</li>
+                        <li>job_title (e.g., Assistant Professor, Lecturer)</li>
+                        <li>department (e.g., Department of Computing)</li>
+                        <li>college (e.g., College of Computing)</li>
+                        <li>office_building (e.g., Nicks Hall)</li>
+                        <li>office_room (e.g., 301)</li>
                     </ul>
                 </div>
 

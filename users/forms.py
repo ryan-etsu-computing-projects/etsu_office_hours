@@ -7,19 +7,24 @@ from django.utils.crypto import get_random_string
 from .models import EncryptedUser
 import csv
 import io
+from profiles.models import UserProfile
 
-class EncryptedUserCreationForm(UserCreationForm):
-    """Form for creating a new user with encrypted fields."""
-    email = forms.EmailField(
-        required=True,
-        help_text='Required. Must be a valid ETSU email address.',
-        widget=forms.EmailInput(attrs={'autocomplete': 'email'})
-    )
-    
+class UserWithProfileCreationForm(UserCreationForm):
+    """Form for creating a new user with initial profile information."""
+    # Profile fields
+    honorific = forms.CharField(max_length=50, required=False, label='Title/Honorific (e.g., Dr., Prof., Mr., Ms.)')
+    job_title = forms.CharField(max_length=100, required=False, label='Job Title')
+    department = forms.CharField(max_length=100, required=False)
+    college = forms.CharField(max_length=100, required=False)
+    office_building = forms.CharField(max_length=100, required=False, label='Office Building')
+    office_room = forms.CharField(max_length=50, required=False, label='Office Room Number')
+
     class Meta:
         model = EncryptedUser
-        fields = ('email', 'first_name', 'last_name')
-        
+        fields = ('email', 'first_name', 'last_name', 'password1', 'password2',
+                 'honorific', 'job_title', 'department', 'college',
+                 'office_building', 'office_room')
+
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
         if not email.endswith('@etsu.edu'):
@@ -27,13 +32,27 @@ class EncryptedUserCreationForm(UserCreationForm):
         if EncryptedUser.objects.filter(email=email).exists():
             raise ValidationError("This email address is already in use.")
         return email
-        
+
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.username = None  # Ensure username is not used
+        # Generate a random password
+        temp_password = get_random_string(12)
+        user.set_password(temp_password)
+
         if commit:
             user.save()
-        return user
+
+            # Create or update profile with the provided fields
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.honorific = self.cleaned_data.get('honorific', '')
+            profile.job_title = self.cleaned_data.get('job_title', '')
+            profile.department = self.cleaned_data.get('department', '')
+            profile.college = self.cleaned_data.get('college', '')
+            profile.office_building = self.cleaned_data.get('office_building', '')
+            profile.office_room = self.cleaned_data.get('office_room', '')
+            profile.save()
+
+        return user, temp_password
 
 class CSVUploadForm(forms.Form):
     """Form for uploading CSV file containing multiple users."""
@@ -93,28 +112,6 @@ class CSVUploadForm(forms.Form):
             
         except Exception as e:
             raise ValidationError(f'Error processing CSV file: {str(e)}')
-
-class UserQuickCreateForm(forms.ModelForm):
-    """Form for quickly creating a single user with minimal fields."""
-    class Meta:
-        model = EncryptedUser
-        fields = ('email', 'first_name', 'last_name')
-        
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].required = True
-            
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        # Generate a random password
-        temp_password = get_random_string(12)
-        user.set_password(temp_password)
-        
-        if commit:
-            user.save()
-            
-        return user, temp_password
 
 class AdminUserChangeForm(UserChangeForm):
     """Custom form for admin to edit user details."""

@@ -1,4 +1,4 @@
-{% extends '../base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="row mb-4">
@@ -9,12 +9,28 @@
 
 <div class="row mb-4">
     <div class="col">
-        <div class="input-group">
-            <input type="text" class="form-control search" placeholder="Search by name, department, college, or office...">
-            <button class="btn btn-outline-secondary" type="button">
-                <i class="bi bi-search"></i>
-            </button>
+        <form method="get" action="{% url 'profiles:home' %}">
+            <div class="input-group">
+                <input type="text" class="form-control search" name="search" placeholder="Search by name, job title, department, or college..." value="{{ search_query }}">
+                <button class="btn btn-outline-secondary" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+        {% if search_query %}
+        <div class="row mb-3">
+            <div class="col">
+                <div class="alert alert-info">
+                    {% if total_results > 0 %}
+                        Found {{ total_results }} result{{ total_results|pluralize }} for "<strong>{{ search_query }}</strong>"
+                    {% else %}
+                        No results found for "<strong>{{ search_query }}</strong>"
+                    {% endif %}
+                    <a href="{% url 'profiles:home' %}" class="alert-link">Clear search</a>
+                </div>
+            </div>
         </div>
+        {% endif %}
     </div>
 </div>
 
@@ -32,35 +48,109 @@
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title">
-                            {% if profile.title %}{{ profile.title }} {% endif %}
-                            {{ profile.user.get_full_name }}
+                            {% if profile.honorific %}{{ profile.honorific }} {% endif %}
+                            {% if profile.preferred_name %}
+                                {{ profile.preferred_name }}
+                            {% else %}
+                                {{ profile.user.get_full_name }}
+                            {% endif %}
                         </h5>
-                        {% if profile.pronouns %}
-                            <p class="card-text text-muted">{{ profile.pronouns }}</p>
+
+                        <div class="mb-2">
+                            {% if profile.pronouns %}
+                                <span class="text-muted">{{ profile.pronouns }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if profile.job_title %}
+                            <p class="card-text text-muted mb-2">{{ profile.job_title }}</p>
                         {% endif %}
+
+                        {% if profile.department %}
+                            <p class="card-text small mb-2">{{ profile.department }}</p>
+                        {% endif %}
+
                         <p class="card-text">
                             <a href="mailto:{{ profile.user.email }}" class="text-decoration-none">
                                 <i class="bi bi-envelope"></i> {{ profile.user.email }}
                             </a>
                         </p>
+
                         <a href="{% url 'profiles:profile_detail' profile.pk %}" class="btn btn-primary">View Profile</a>
                     </div>
                 </div>
             </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <h4 class="text-muted">No profiles found</h4>
+                {% if search_query %}
+                    <p>Try using different search terms or <a href="{% url 'profiles:home' %}">view all profiles</a></p>
+                {% endif %}
+            </div>
         {% endfor %}
     </div>
+
+    <!-- Pagination Controls -->
+    {% if profiles.paginator.num_pages > 1 %}
+    <div class="row mt-4">
+        <div class="col">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if profiles.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ profiles.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                    {% endif %}
+
+                    {% for page_num in profiles.paginator.page_range %}
+                        {% if profiles.number == page_num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% elif page_num > profiles.number|add:'-3' and page_num < profiles.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if profiles.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ profiles.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ profiles.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
 </div>
-
-{% endblock %}
-
-{% block extra_js %}
-<script>
-var options = {
-    valueNames: [
-        'card-title',
-        { data: ['department', 'college'] }
-    ]
-};
-var profilesList = new List('profiles-list', options);
-</script>
 {% endblock %}

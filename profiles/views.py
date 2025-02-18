@@ -142,12 +142,6 @@ def profile_detail(request, pk):
     office_hours = OfficeHours.objects.filter(user=profile.user).first()
     course_hours = CourseOfficeHours.objects.filter(office_hours=office_hours) if office_hours else None
     
-    # Debug logging
-    if course_hours:
-        for course in course_hours:
-            print(f"Course: {course.course_name}")
-            print(f"Time slots: {course.time_slots}")
-    
     return render(request, 'profiles/profile_detail.html', {
         'profile': profile,
         'office_hours': office_hours,
@@ -200,7 +194,6 @@ def course_hours_add(request):
         if form.is_valid():
             course_hours = form.save(commit=False)
             course_hours.office_hours = office_hours
-            print(f"Loading time slots: {course_hours.time_slots}")
 
             course_hours.save()
             messages.success(request, 'Course office hours added successfully')
@@ -216,7 +209,6 @@ def course_hours_add(request):
 @login_required
 def course_hours_edit(request, pk):
     course_hours = get_object_or_404(CourseOfficeHours, pk=pk)
-    print(f"Loading time slots: {course_hours.time_slots}")
     
     # Ensure user can only edit their own course hours
     if course_hours.office_hours.user != request.user:

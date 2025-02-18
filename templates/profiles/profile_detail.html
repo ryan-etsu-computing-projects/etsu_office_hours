@@ -15,6 +15,7 @@
 {% endblock %}
 
 {% block content %}
+
 <div class="row">
     <div class="col-md-4">
         <div class="card mb-4">
@@ -102,7 +103,7 @@
                     
                     {% if office_hours.scheduling_link %}
                         <p>
-                            <a href="{{ office_hours.scheduling_link }}" class="btn btn-primary" target="_blank">
+                            <a href="{{ office_hours.scheduling_link }}" class="btn bttn-primary" target="_blank">
                                 <i class="bi bi-calendar"></i> Schedule a Meeting
                             </a>
                         </p>
@@ -232,13 +233,13 @@
                 <div class="card-body">
                     <h4>Manage Your Profile</h4>
                     <div class="d-grid gap-2">
-                        <a href="{% url 'profiles:profile_edit' %}" class="btn btn-primary">
+                        <a href="{% url 'profiles:profile_edit' %}" class="btn bttn-edit">
                             <i class="bi bi-pencil"></i> Edit Profile
                         </a>
-                        <a href="{% url 'profiles:office_hours_edit' %}" class="btn btn-primary">
+                        <a href="{% url 'profiles:office_hours_edit' %}" class="btn bttn-edit">
                             <i class="bi bi-clock"></i> Edit Office Hours
                         </a>
-                        <a href="{% url 'profiles:course_hours_add' %}" class="btn btn-primary">
+                        <a href="{% url 'profiles:course_hours_add' %}" class="btn bttn-add">
                             <i class="bi bi-plus-circle"></i> Add Course Hours
                         </a>
                     </div>

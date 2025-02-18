@@ -1,0 +1,30 @@
+.bttn-add {
+    background-color: hsl(134, 32%, 43%)!important;
+    color: white!important;
+}
+
+.bttn-add:hover {
+    background-color: hsl(134, 41%, 43%)!important;
+    color: white!important;
+    font-weight: 500;
+}
+
+.bttn-edit {
+    background-color: hsl(48, 62%, 71%)!important;
+}
+
+.bttn-edit:hover {
+    background-color: hsl(48, 53%, 68%)!important;
+    font-weight: 500;
+}
+
+.bttn-primary {
+    background-color: hsl(225, 44%, 34%)!important;
+    color: white!important;
+}
+
+.bttn-primary:hover {
+    background-color: hsl(225, 51%, 44%)!important;
+    color: white!important;
+    font-weight: 500;
+}

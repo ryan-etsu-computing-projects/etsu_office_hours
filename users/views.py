@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test
@@ -5,6 +6,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import logout
 from django.contrib import messages
+from django.db import models
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
@@ -29,11 +31,53 @@ def logout_view(request):
 
 @user_passes_test(is_admin)
 def user_management(request):
-    users = EncryptedUser.objects.all().order_by('-date_joined')
+    # Get all users ordered by last name, first name
+    users_list = EncryptedUser.objects.all().order_by('last_name', 'first_name')
+
+    # Get filter and search parameters
+    search_query = request.GET.get('search', '').strip()
+    status_filter = request.GET.get('status', '')  # 'active' or 'inactive'
+
+    # Apply status filter if specified
+    if status_filter == 'active':
+        users_list = users_list.filter(is_active=True)
+    elif status_filter == 'inactive':
+        users_list = users_list.filter(is_active=False)
+
+    # Apply search if provided
+    if search_query:
+        users_list = users_list.filter(
+            models.Q(email__icontains=search_query) |
+            models.Q(first_name__icontains=search_query) |
+            models.Q(last_name__icontains=search_query)
+        )
+
+    # Number of users per page (adjust as needed)
+    per_page = 15
+
+    # Create paginator instance
+    paginator = Paginator(users_list, per_page)
+
+    # Get page number from request
+    page = request.GET.get('page', 1)
+
+    try:
+        users = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page
+        users = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page
+        users = paginator.page(paginator.num_pages)
+
     context = {
         'users': users,
-        'now': timezone.now()  # Add current time to context
+        'now': timezone.now(),
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'total_results': users_list.count(),
     }
+
     return render(request, 'users/management.html', context)
 
 @user_passes_test(is_admin)

@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="row mb-4">
+    <div class="row mb-4 align-items-center">
         <div class="col">
             <h2>User Management</h2>
         </div>
@@ -19,9 +19,67 @@
         </div>
     </div>
 
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" action="{% url 'users:manage' %}" id="searchForm">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" placeholder="Search by name or email..." value="{{ search_query }}">
+                    <input type="hidden" name="status" value="{{ status_filter }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex justify-content-end">
+                <!-- Status Filter Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if status_filter == 'active' %}
+                            Active Users
+                        {% elif status_filter == 'inactive' %}
+                            Inactive Users
+                        {% else %}
+                            All Users
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+                        <li><a class="dropdown-item {% if not status_filter %}active{% endif %}" href="#" data-filter="">All Users</a></li>
+                        <li><a class="dropdown-item {% if status_filter == 'active' %}active{% endif %}" href="#" data-filter="active">Active Users</a></li>
+                        <li><a class="dropdown-item {% if status_filter == 'inactive' %}active{% endif %}" href="#" data-filter="inactive">Inactive Users</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if search_query or status_filter %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                <div>
+                    Found {{ total_results }} user{{ total_results|pluralize }}
+                    {% if search_query %}matching "<strong>{{ search_query }}</strong>"{% endif %}
+                    {% if status_filter %}
+                        {% if status_filter == 'active' %}
+                            with <strong>Active</strong> status
+                        {% elif status_filter == 'inactive' %}
+                            with <strong>Inactive</strong> status
+                        {% endif %}
+                    {% endif %}
+                </div>
+                <a href="{% url 'users:manage' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear Filters
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive" style="min-height: 50vh;">
+            <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -36,8 +94,13 @@
                     </thead>
                     <tbody>
                         {% for user in users %}
-                            {% with days_since_login=user.last_login|timesince:now %}
-                            <tr class="{% if not user.is_active %}table-danger{% elif days_since_login > 360 %}table-warning{% elif days_since_login > 120 %}table-info{% endif %}">
+                            <tr {% if not user.is_active %}
+                                    class="table-danger"
+                                {% elif user.last_login and user.last_login|timesince:now > '360 days' %}
+                                    class="table-warning"
+                                {% elif user.last_login and user.last_login|timesince:now > '120 days' %}
+                                    class="table-info"
+                                {% endif %}>
                                 <td>{{ user.get_full_name }}</td>
                                 <td>{{ user.email }}</td>
                                 <td>
@@ -55,13 +118,13 @@
                                 <td>
                                     {% if user.last_login %}
                                         {{ user.last_login|date:"M d, Y" }}
-                                        <small class="text-muted">({{ user.last_login|timesince }} ago)</small>
+                                        <small class="text-muted">({{ user.last_login|timesince:now }} ago)</small>
                                     {% else %}
                                         Never
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {{ user.date_joined|timesince }}
+                                    {{ user.date_joined|timesince:now }}
                                 </td>
                                 <td>
                                     <div class="btn-group">
@@ -88,12 +151,96 @@
                                     </div>
                                 </td>
                             </tr>
-                            {% endwith %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <p class="text-muted mb-0">No users found</p>
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Controls -->
+            {% if users.paginator.num_pages > 1 %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if users.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ users.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">&laquo;&laquo;</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in users.paginator.page_range %}
+                            {% if users.number == page_num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% elif page_num > users.number|add:'-3' and page_num < users.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if users.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ users.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ users.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">&raquo;</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">&raquo;&raquo;</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle filter dropdown clicks
+    document.querySelectorAll('[data-filter]').forEach(item => {
+        item.addEventListener('click', event => {
+            event.preventDefault();
+            const filter = event.target.dataset.filter;
+            const searchForm = document.getElementById('searchForm');
+            const statusInput = searchForm.querySelector('input[name="status"]');
+            statusInput.value = filter;
+            searchForm.submit();
+        });
+    });
+});
+</script>
 {% endblock %}

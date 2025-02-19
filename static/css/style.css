@@ -1,4 +1,6 @@
 :root{
+    /* Colors */
+    --clr-light: 43, 41%, 96%;
     --clr-primary: 225, 44%, 34%;
     --clr-primary-hover: 225, 51%, 44%;
     --clr-secondary: 201, 34%, 40%;
@@ -10,6 +12,85 @@
     --clr-snow: 0, 20%, 98%;
     --clr-putty-yellow: 48, 62%, 71%;
     --clr-putty-yellow-hover: 48, 53%, 68%;
+    --clr-etsu-yellow: 44, 96%, 71%;
+
+    /* Font-sizes */
+    --fs-900: 9.375rem;
+    --fs-850: 7.813rem;
+    --fs-800: 6.25rem;
+    --fs-750: 4.875rem;
+    --fs-700: 3.5rem;
+    --fs-650: 2.75rem;
+    --fs-600: 2rem;
+    --fs-550: 1.875rem;
+    --fs-500: 1.75rem;
+    --fs-450: 1.313rem;
+    --fs-400: 1.125rem;
+    --fs-350: 1.06rem;
+    --fs-300: 1rem;
+    --fs-250: 0.94rem;
+    --fs-200: 0.875rem;
+    --fs-150: 0.81rem;
+    --fs-100: 0.75rem;
+    --fs-0: 0.625rem;
+}
+
+/* Remove animations for those who have turned them off */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ---------- Start Typography ---------- */
+.fs-0 { font-size: var(--fs-0); }
+.fs-100 { font-size: var(--fs-100); }
+.fs-150 { font-size: var(--fs-150); }
+.fs-200 { font-size: var(--fs-200); }
+.fs-250 { font-size: var(--fs-250); }
+.fs-300 { font-size: var(--fs-300); }
+.fs-350 { font-size: var(--fs-350); }
+.fs-400 { font-size: var(--fs-400); }
+.fs-450 { font-size: var(--fs-450); }
+.fs-500 { font-size: var(--fs-500); }
+.fs-550 { font-size: var(--fs-550); }
+.fs-600 { font-size: var(--fs-600); }
+.fs-650 { font-size: var(--fs-650); }
+.fs-700 { font-size: var(--fs-700); }
+.fs-750 { font-size: var(--fs-750); }
+.fs-800 { font-size: var(--fs-800); }
+.fs-850 { font-size: var(--fs-850); }
+.fs-900 { font-size: var(--fs-900); }
+
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
+
+.text-regular {
+    font-family: "League Spartan", Georgia, Cambria, 'Times New Roman', Times, serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.text-semibold {
+    font-family: "League Spartan", Georgia, Cambria, 'Times New Roman', Times, serif;
+    font-weight: 500;
+    font-style: normal;
+}
+
+.text-bold {
+    font-family: "League Spartan", Georgia, Cambria, 'Times New Roman', Times, serif;
+    font-weight: 600;
+    font-style: normal;
+}
+/* ---------- End Typography ----------- */
+
+/* ---------- Start BG Colors ---------- */
+.bg-light {
+    background-color: hsl(var(--clr-light))!important;
 }
 
 .bg-primary {
@@ -24,6 +105,18 @@
     background-color: hsl(var(--clr-putty-yellow))!important;
 }
 
+.bg-etsu-yellow {
+    background-color: hsl(var(--clr-etsu-yellow))!important;
+}
+/* ---------- End BG Colors ----------- */
+
+/* --------- Start Text Colors -------- */
+.text-highlight-primary {
+    color: hsl(var(--clr-primary));
+}
+/* --------- End Text Colors --------- */
+
+/* ----------- Start Buttons ---------- */
 .bttn-create {
     background-color: hsl(var(--clr-create))!important;
     color: white!important;
@@ -32,18 +125,19 @@
 .bttn-create:hover {
     background-color: hsl(var(--clr-create-hover))!important;
     color: white!important;
-    font-weight: 500;
+    font-weight: 500!important;
 }
 
 .bttn-edit {
     background-color: hsl(var(--clr-secondary))!important;
     color: white!important;
+    font-weight: 500!important
 }
 
 .bttn-edit:hover {
     background-color: hsl(var(--clr-secondary-hover))!important;
     color: white!important;
-    font-weight: 500;
+    font-weight: 500!important
 }
 
 .bttn-outline-edit {
@@ -52,6 +146,7 @@
     color: hsl(var(--clr-secondary))!important;
     color: #212529!important;
     font-weight: 500!important;
+    transition-duration: 0.33s;
 }
 
 .bttn-outline-edit:hover {
@@ -82,8 +177,33 @@
     color: #212529!important;
     font-weight: 500;
 }
+/* ----------- End Buttons ----------- */
 
-input[type=text], input[type=password], input[type=email], input[type=url] {
+.body-light {
+    background-color: hsl(var(--clr-light))!important;
+}
+
+body {
+    font-family: "League Spartan", serif;
+    font-size: 19px;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* Reset margins */
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+figure,
+picture {
+    margin: 0;
+}
+
+input[type=text], input[type=password], input[type=email], input[type='tel'], input[type=url] {
     width: 100%;
     padding: 5px;
     border: 1px solid #ccc;
@@ -124,19 +244,6 @@ label, .forms-label {
     margin: 4vh auto 0;
     border: 1px solid #ccc;
     word-wrap: break-word;
-}
-
-.login-container {
-    margin: 80px auto 0;
-    border: 1px solid #ccc;
-    padding-left: 5%;
-    padding-right: 5%;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    max-width: 1076px;
-    width: 70%;
-    background-color: rgba(228, 228, 228, 0.2);
-    border-radius: 10px;
 }
 
 .button-container {

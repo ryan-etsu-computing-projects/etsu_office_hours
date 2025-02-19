@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load form_filters %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col">
-        <h2>ETSU Faculty & Staff Directory</h2>
+        <h1>Faculty & Staff Directory</h1>
     </div>
 </div>
 
@@ -15,7 +16,7 @@
                     placeholder="Search by name, job title, department, or college..." value="{{ search_query }}">
                 <input type="hidden" name="classification" value="{{ classification_filter }}">
                 <input type="hidden" name="sort" value="{{ sort_direction }}">
-                <button class="btn btn-outline-secondary" type="submit">
+                <button class="btn btn-outline-secondary" type="submit" data-mdb-ripple-init>
                     <i class="bi bi-search"></i>
                 </button>
             </div>
@@ -85,41 +86,34 @@
                 <div class="card h-100" style="background-color: #fffdf9;">
                     {% if profile.profile_image %}
                         <img src="{{ profile.profile_image.url }}" class="card-img-top" alt="{{ profile.user.get_full_name }}"
-                            style="object-fit: cover; max-height: 28rem;">
+                            style="object-fit: cover; max-height: 30rem;">
                     {% else %}
-                        <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 28rem;">
+                        <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 30rem;">
                             <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
                         </div>
                     {% endif %}
                     <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">
-                            {% if profile.honorific %}{{ profile.honorific }} {% endif %}
-                            {% if profile.preferred_name %}
-                                {{ profile.preferred_name }}
-                            {% else %}
-                                {{ profile.user.get_full_name }}
-                            {% endif %}
-                        </h5>
-
-                        <div class="mb-2">
+                        <h4 class="card-title text-highlight-primary">
+                            {{ profile|print_preferred_name }}
                             {% if profile.pronouns %}
-                                <span class="text-muted">{{ profile.pronouns }}</span>
+                                <span class="text-muted">({{ profile.pronouns }})</span>
                             {% endif %}
-                        </div>
-
-                        {% if profile.job_title %}
-                            <p class="card-text text-muted mb-2">{{ profile.job_title }}</p>
-                        {% endif %}
-
-                        {% if profile.department %}
-                            <p class="card-text small mb-2">{{ profile.department }}</p>
-                        {% endif %}
-
-                        <p class="card-text">
-                            <a href="mailto:{{ profile.user.email }}" class="text-decoration-none">
-                                <i class="bi bi-envelope"></i> {{ profile.user.email }}
+                            <a href="mailto:{{ profile.user.email }}" title="Email {{ profile|print_preferred_name }}" class="text-decoration-none" style="float: right;">
+                                <i class="bi bi-envelope"></i>
                             </a>
-                        </p>
+                        </h4>
+                        {% if profile.job_title %}
+                            <p class="card-text text-muted mb-0">{% newline_split_on_tokens profile.job_title '&,' %}</p>
+                        {% endif %}
+                        <hr>
+
+                        {% if profile.department or profile.college %}
+                            {% if profile.department %}
+                                <p class="card-text mb-2">{{ profile.department }}</p>
+                            {% else %}
+                                <p class="card-text mb-2">{{ profile.college }}</p>
+                            {% endif %}
+                        {% endif %}
 
                         <div class="mt-auto">
                             <a href="{% url 'profiles:profile_detail' profile.pk %}" class="btn bttn-primary w-100">View Profile</a>

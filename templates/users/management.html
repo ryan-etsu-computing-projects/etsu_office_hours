@@ -94,13 +94,11 @@
                     </thead>
                     <tbody>
                         {% for user in users %}
-                            <tr {% if not user.is_active %}
-                                    class="table-danger"
-                                {% elif user.last_login and user.last_login|timesince:now > '360 days' %}
-                                    class="table-warning"
-                                {% elif user.last_login and user.last_login|timesince:now > '120 days' %}
-                                    class="table-info"
-                                {% endif %}>
+                            {% if not user.is_active %}
+                            <tr class="table-warning">
+                            {% else %}
+                            <tr class="{{ user.last_login|get_last_login_label }}"></tr>
+                            {% endif %}
                                 <td>{{ user.get_full_name }}</td>
                                 <td>{{ user.email }}</td>
                                 <td>

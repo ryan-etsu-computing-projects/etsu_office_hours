@@ -5,7 +5,7 @@
 <div class="row">
     <div class="col-md-6 offset-md-3">
         <div class="card">
-            <div class="card-body">
+            <div class="card-body p-4">
                 <h3 class="card-title text-center mb-4">Login</h3>
                 <form method="post">
                     {% csrf_token %}
@@ -35,6 +35,7 @@
 
 {% block extra_js %}
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     let pwdInputs = document.querySelectorAll('input[type="password"]');
     let allInputs = document.getElementsByTagName('form')[0].getElementsByTagName('input'); // All form inputs
     let allLabels = document.getElementsByTagName('form')[0].getElementsByTagName('label'); // All form labels
@@ -66,39 +67,38 @@
         }
     }
 
-    $(document).ready(function () {
-        let dom = new DOMParser();
-        let eyeCon = null;
-        /*
-            Foreach password input, insert an eye icon that will toggle the input 'type' property to reveal
-            the password in plain text. The eyecon is inserted after the input field. Its negative top margin
-            allows it to overlap the input field.
-        */
-        for (let i = 0; i < pwdInputs.length; i++) {
-            eyeCon =
-                `<div class="password-reveal-wrapper" title="Reveal password" onclick="toggleShowPassword(${i})" id="password-eye-${i}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                    </svg>
-                </div>`;
-            pwdInputs[i].insertAdjacentHTML('afterend', eyeCon);
-        }
+    let dom = new DOMParser();
+    let eyeCon = null;
+    /*
+        Foreach password input, insert an eye icon that will toggle the input 'type' property to reveal
+        the password in plain text. The eyecon is inserted after the input field. Its negative top margin
+        allows it to overlap the input field.
+    */
+    for (let i = 0; i < pwdInputs.length; i++) {
+        eyeCon =
+            `<div class="password-reveal-wrapper" title="Reveal password" onclick="toggleShowPassword(${i})" id="password-eye-${i}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                </svg>
+            </div>`;
+        pwdInputs[i].insertAdjacentHTML('afterend', eyeCon);
+    }
 
-        if (pwdInputs.length != 0) {
-            let inputWidth = pwdInputs[0].clientWidth;
-            let marginLeftPct = '10%';
-            let newInputWidthPct = ( 100 * ( (inputWidth*0.9) / inputWidth ) ).toString() + "%"; // This will be new width after adding left margin
-            let textIndentPx = '5px'; // Indent the text because the password icon overlaps some when screen gets small.
+    if (pwdInputs.length != 0) {
+        let inputWidth = pwdInputs[0].clientWidth;
+        let marginLeftPct = '10%';
+        let newInputWidthPct = ( 100 * ( (inputWidth*0.9) / inputWidth ) ).toString() + "%"; // This will be new width after adding left margin
+        let textIndentPx = '5px'; // Indent the text because the password icon overlaps some when screen gets small.
 
-            for (let i = 0; i < allInputs.length; i++) {
-                allInputs[i].style.marginLeft = marginLeftPct;
-                allInputs[i].style.width = newInputWidthPct;
-                allInputs[i].style.textIndent = textIndentPx;
-                allLabels[i].style.marginLeft = marginLeftPct;
-                allBtns[i].style.marginLeft = marginLeftPct;
-            }
+        for (let i = 0; i < allInputs.length; i++) {
+            allInputs[i].style.marginLeft = marginLeftPct;
+            allInputs[i].style.width = newInputWidthPct;
+            allInputs[i].style.textIndent = textIndentPx;
+            allLabels[i].style.marginLeft = marginLeftPct;
+            allBtns[i].style.marginLeft = marginLeftPct;
         }
-    });
+    }
+});
 </script>
 {% endblock %}

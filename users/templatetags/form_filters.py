@@ -1,6 +1,8 @@
+from datetime import datetime as dt
 from django.contrib.auth.models import Group
 from django import template
 from django.utils.safestring import mark_safe
+from django.utils.timesince import timesince
 import re
 
 register = template.Library()
@@ -42,15 +44,32 @@ def has_group(user, group_name):
         return False
     return group in user.groups.all()
 
+@register.filter(name='get_last_login_label')
+def get_last_login_label(value):
+    if not value:
+        return ""
+    try:
+        ts = timesince(value, dt.now())
+        if ts > '360 days':
+            return "table warning"
+        elif ts > '120 days':
+            return "table-info"
+        else:
+            return ""
+    except (ValueError, TypeError):
+        return ""
+
 @register.simple_tag(name='newline_split_on_tokens')
 def newline_split_on_tokens(text, tokens_str):
-    result = text
-    tokens = list(tokens_str)
-    for token in tokens:
-        if token in text:
-            print(f"token {token} found")
-            split_text = text.split(token)
-            stripped = [ t.strip() for t in split_text ]
-            result = mark_safe('<br>'.join(stripped))
-            break
+    try:
+        result = text
+        tokens = list(tokens_str)
+        for token in tokens:
+            if token in text:
+                split_text = text.split(token)
+                stripped = [ t.strip() for t in split_text ]
+                result = mark_safe('<br>'.join(stripped))
+                break
+    except (ValueError, TypeError):
+        return ""
     return result

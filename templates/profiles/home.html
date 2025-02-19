@@ -4,7 +4,7 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col">
-        <h1>Faculty & Staff Directory</h1>
+        <h1>Search Faculty & Staff</h1>
     </div>
 </div>
 
@@ -12,7 +12,7 @@
     <div class="col-md-8">
         <form method="get" action="{% url 'profiles:home' %}" id="searchForm">
             <div class="input-group">
-                <input style="background-color: #fffdf9;" type="text" class="form-control search" name="search"
+                <input style="background-color: #fffdf9;" type="text" id="mainSearch" class="form-control search" name="search"
                     placeholder="Search by name, job title, department, or college..." value="{{ search_query }}">
                 <input type="hidden" name="classification" value="{{ classification_filter }}">
                 <input type="hidden" name="sort" value="{{ sort_direction }}">
@@ -199,6 +199,8 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    let mainSearch = document.getElementById('mainSearch');
+
     // Handle filter dropdown clicks
     document.querySelectorAll('[data-filter]').forEach(item => {
         item.addEventListener('click', event => {
@@ -221,6 +223,14 @@ document.addEventListener('DOMContentLoaded', function() {
             sortInput.value = sort;
             searchForm.submit();
         });
+    });
+
+    function clearSearch() {
+        mainSearch.value = '';
+    }
+
+    mainSearch.addEventListener('focus', (ev) => {
+        clearSearch();
     });
 });
 </script>

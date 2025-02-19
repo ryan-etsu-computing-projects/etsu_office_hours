@@ -17,6 +17,11 @@
 
 {% block content %}
 
+<div class="container-fluid mb-3 fs-400" title="Breadcrumb navigation">
+    <a class="text-secondary-blue" href="{% url 'profiles:home' %}">Home</a>
+    » <span class="ff-sans-bolder">Profile Detail</span>
+</div>
+
 <div class="row">
     <div class="col-md-4">
         <div class="card mb-4">
@@ -110,11 +115,11 @@
                         {% endif %}
                     </div>
                 </div>
-                <p class="badge bg-info fs-300">Semester: {{ office_hours.semester }}</p>
+                <p class="badge bg-info fs-300 mb-2">Semester: {{ office_hours.semester }}</p>
                 {% if office_hours.scheduling_link %}
-                    <p class="mt-2">
+                    <p>
                         <a href="{{ office_hours.scheduling_link }}" class="btn bttn-primary" target="_blank">
-                            <i class="bi bi-calendar"></i>&ensp;Schedule a Meeting
+                            <i class="bi bi-calendar"></i>&ensp;Schedule a meeting
                         </a>
                     </p>
                 {% endif %}

@@ -17,8 +17,9 @@
 <body class="body-light">
     <nav class="navbar navbar-expand-lg navbar-light bg-etsu-yellow">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'profiles:home' %}">
-                <img src="{% static 'img/etsu-logo-nav.png' %}" height="50" alt="ETSU logo">
+            <a class="navbar-brand pt-3" href="{% url 'profiles:home' %}" id="navbarBrand" style="position: absolute;">
+                <img src="{% static 'img/etsu-logo-nav.png' %}" height="55" alt="ETSU logo">
+                <span class="fs-550" style="color:#00043e;">&nbsp;Office Hours Directory</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -67,4 +68,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
     {% block extra_js %}{% endblock %}
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let navbarBrand = document.getElementById('navbarBrand');
+        let navbarImg = navbarBrand.getElementsByTagName('img')[0];
+        let w = navbarImg.width;
+        let h = navbarImg.height;
+        let shrunkNavImgWidth = ( w-2 ).toString();
+        let shrunkNavImgHeight = ( h-2 ).toString();
+
+        navbarBrand.addEventListener('mouseover', event => {
+            navbarImg.width = shrunkNavImgWidth;
+            navbarImg.height = shrunkNavImgHeight;
+        });
+
+        navbarBrand.addEventListener('mouseout', event => {
+            navbarImg.width = w;
+            navbarImg.height = h;
+        });
+    });
+</script>
 </html>

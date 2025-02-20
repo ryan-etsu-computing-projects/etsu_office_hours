@@ -8,4 +8,4 @@ venv
 # Cache files or directories
 *pyc*
 # Sqlite database
-*sqlite*
+#*sqlite*

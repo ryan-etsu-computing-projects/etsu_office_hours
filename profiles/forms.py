@@ -13,7 +13,7 @@ class ProfileForm(forms.ModelForm):
                   'job_title', 'department', 'college', 'office_building', 'office_room']
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4}),
-            'phone': forms.TextInput(attrs={'placeholder': '(123) 456-7890'}),
+            'phone': forms.TextInput(attrs={'placeholder': '(423) 439-1234'}),
         }
         labels = {
             'honorific': 'Title/Honorific (e.g., Dr., Professor, Mr., Ms.)',

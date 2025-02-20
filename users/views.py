@@ -194,6 +194,8 @@ def upload_csv(request):
                         profile.office_building = row['office_building']
                     if 'office_room' in row and row['office_room']:
                         profile.office_room = row['office_room']
+                    if 'phone' in row and row['phone']:
+                        profile.phone = row['phone']
 
                     profile.save()
 

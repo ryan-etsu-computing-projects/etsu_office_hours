@@ -157,7 +157,6 @@
 .bttn-edit {
     background-color: hsl(var(--clr-secondary))!important;
     color: white!important;
-    font-weight: 500!important
 }
 
 .bttn-edit:hover {

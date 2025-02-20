@@ -17,15 +17,14 @@ class UserWithProfileCreationForm(UserCreationForm):
     )
 
     # Profile fields
-    classification = forms.CharField(
-        widget=forms.Select(choices=CLASSIFICATION_CHOICES), label='Classification'
-    )
+    classification = forms.CharField(widget=forms.Select(choices=CLASSIFICATION_CHOICES), label='Classification')
     honorific = forms.CharField(max_length=50, required=False, label='Title/Honorific (e.g., Dr., Prof., Mr., Ms.)')
+    phone = forms.CharField(required=False, label='Phone',widget=forms.TextInput(attrs={'placeholder': '(423) 439-1234'}))
     job_title = forms.CharField(max_length=100, required=False, label='Job Title')
-    department = forms.CharField(max_length=100, required=False)
-    college = forms.CharField(max_length=100, required=False)
-    office_building = forms.CharField(max_length=100, required=False, label='Office Building')
-    office_room = forms.CharField(max_length=50, required=False, label='Office Room Number')
+    department = forms.CharField(max_length=100, required=False, label='Department (e.g., Department of Computing)')
+    college = forms.CharField(max_length=100, required=False, label='College (e.g., College of Business and Technology)')
+    office_building = forms.CharField(max_length=100, required=False, label='Office Building (e.g., Nicks Hall)')
+    office_room = forms.CharField(max_length=50, required=False, label='Office Room Number (e.g., 404)')
 
     class Meta:
         model = EncryptedUser
@@ -45,6 +44,22 @@ class UserWithProfileCreationForm(UserCreationForm):
             raise ValidationError("This email address is already in use.")
         return email
 
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if phone:
+            print(">> Got the phone!")
+            # Remove any non-digit characters
+            phone = ''.join(filter(str.isdigit, phone))
+
+            # Validate length
+            if len(phone) != 10:
+                raise ValidationError("Phone number must be 10 digits.")
+
+            # Format as (XXX) XXX-XXXX
+            phone = f"({phone[:3]}) {phone[3:6]}-{phone[6:]}"
+
+        return phone
+
     def save(self, commit=True):
         # Calling forms.ModelForm contstructor instead of super().save(...) to bypass
         # the UserCreationForm's save method entirely (requires password1)
@@ -59,6 +74,7 @@ class UserWithProfileCreationForm(UserCreationForm):
             # Create or update profile with the provided fields
             profile, created = UserProfile.objects.get_or_create(user=user)
             profile.honorific = self.cleaned_data.get('honorific', '')
+            profile.phone = self.cleaned_data.get('phone', '')
             profile.job_title = self.cleaned_data.get('job_title', '')
             profile.department = self.cleaned_data.get('department', '')
             profile.college = self.cleaned_data.get('college', '')

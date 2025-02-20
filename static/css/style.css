@@ -69,19 +69,19 @@
 
 @import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
 
-.text-regular {
+.ff-regular {
     font-family: "League Spartan", Georgia, Cambria, 'Times New Roman', Times, serif;
     font-weight: 400;
     font-style: normal;
 }
 
-.text-semibold {
+.ff-semibold {
     font-family: "League Spartan", Georgia, Cambria, 'Times New Roman', Times, serif;
     font-weight: 500;
     font-style: normal;
 }
 
-.text-bold {
+.ff-bold {
     font-family: "League Spartan", Georgia, Cambria, 'Times New Roman', Times, serif;
     font-weight: 600;
     font-style: normal;
@@ -113,6 +113,10 @@
 /* --------- Start Text Colors -------- */
 .text-highlight-primary {
     color: hsl(var(--clr-primary));
+}
+
+.text-putty-yellow {
+    color: hsl(var(--clr-putty-yellow));
 }
 /* --------- End Text Colors --------- */
 
@@ -190,7 +194,6 @@
     box-sizing: border-box;
 }
 
-
 /* Reset margins */
 body,
 h1,
@@ -202,6 +205,13 @@ p,
 figure,
 picture {
     margin: 0;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
 }
 /* ----------- End Reset ------------ */
 
@@ -222,11 +232,26 @@ picture {
     background-color: hsl(var(--clr-light))!important;
 }
 
+.page-container {
+    position: relative;
+    min-height: 100vh;
+}
+
+.content-wrap {
+    min-height: 100vh;
+}
+
 body {
     font-family: "League Spartan", serif;
     font-size: 19px;
     line-height: 1.5;
-    min-height: 100vh;
+}
+
+footer {
+    margin: 0;
+    bottom: 0!important;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 input[type=text], input[type=password], input[type=email], input[type='tel'], input[type=url] {
@@ -263,6 +288,13 @@ label, .forms-label {
     font-size: 1.1rem;
 }
 
+.shadow {
+    position: relative;
+    -webkit-box-shadow: 2px 15px 72px -5px rgba(0,0,0,0.8);
+    -moz-box-shadow: 2px 15px 72px -5px rgba(0,0,0,0.8);
+    box-shadow: 2px 15px 72px -5px rgba(0,0,0,0.8);
+}
+
 .form-container {
     border-radius: 10px;
     background-color: white;
@@ -295,11 +327,10 @@ label, .forms-label {
     max-width: 800px;
 }
 
-/* Clear floats after the columns */
-.row:after {
-    content: "";
-    display: table;
-    clear: both;
+@media only screen and (max-width: 475px) {
+    .hide-when-small {
+        display: none;
+    }
 }
 
 /* When the screen is less than 600px wide, make the two columns stack on top of each other */

@@ -109,6 +109,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'haasrr@outlook.com'
 EMAIL_HOST_PASSWORD = 'xsmtpsib-d67776953d2f28af237d934718b5531104071d395097381ced28c9f15720bc17-5D4yMT2Kmx0P9GFY'
+DEFAULT_FROM_EMAIL="ETSU Office Hours <office-hours-no-reply@etsu.edu>"
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'

@@ -1,4 +1,4 @@
-# ETSU Office Hours Directory - Docker Deployment Guide
+# ETSU Office Hours Directory System - Docker Deployment Guide
 
 This guide explains how to deploy the ETSU Office Hours application using Docker and Docker Compose.
 

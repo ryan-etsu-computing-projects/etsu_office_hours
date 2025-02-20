@@ -1,0 +1,2 @@
+# Add to your host's crontab (crontab -e)
+0 2 * * * docker-compose -f /path/to/docker-compose.yml exec -T web python manage.py check_inactive_users >> /path/to/logs/cron.log 2>&1

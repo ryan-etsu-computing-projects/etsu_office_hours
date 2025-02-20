@@ -116,11 +116,11 @@ class OfficeHoursForm(forms.ModelForm):
             
         except json.JSONDecodeError:
             return []  # Return empty list for invalid JSON
-    
+
 class CourseOfficeHoursForm(forms.ModelForm):
     """Form for managing course-specific office hours."""
     time_slots = forms.CharField(widget=forms.HiddenInput(), required=False)
-    
+
     class Meta:
         model = CourseOfficeHours
         fields = ['course_name', 'course_description', 'time_slots']

@@ -1,4 +1,4 @@
-# ETSU Office Hours System - Developer Documentation
+# ETSU Office Hours Directory - Developer Documentation
 
 ## Table of Contents
 1. [Overview](#overview)

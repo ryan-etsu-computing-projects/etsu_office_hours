@@ -118,7 +118,6 @@ def create_user(request):
             html_message = render_to_string('users/email/welcome.html', context)
             plain_message = strip_tags(html_message)
 
-            '''
             send_mail(
                 'Welcome to ETSU Office Hours System',
                 plain_message,
@@ -127,7 +126,6 @@ def create_user(request):
                 html_message=html_message,
                 fail_silently=False,
             )
-            '''
 
             return redirect('users:manage')
     else:
@@ -219,7 +217,6 @@ def upload_csv(request):
                     }
                     html_message = render_to_string('users/email/welcome.html', context)
                     plain_message = strip_tags(html_message)
-                    '''
                     send_mail(
                         'Welcome to ETSU Office Hours System',
                         plain_message,
@@ -228,7 +225,6 @@ def upload_csv(request):
                         html_message=html_message,
                         fail_silently=False,
                     )
-                    '''
                 except Exception as e:
                     messages.error(request, f'Error processing row for {row.get("email")}: {str(e)}')
                     continue

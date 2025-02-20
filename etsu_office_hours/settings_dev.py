@@ -80,6 +80,28 @@ DATABASES = {
     }
 }
 
+# Password validation
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 15,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'custom_validators.validators.SymbolValidator',
+    },
+]
+
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-relay.brevo.com'  # Replace with actual SMTP server
@@ -88,8 +110,13 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'haasrr@outlook.com'
 EMAIL_HOST_PASSWORD = 'xsmtpsib-d67776953d2f28af237d934718b5531104071d395097381ced28c9f15720bc17-5D4yMT2Kmx0P9GFY'
 
-# Static files (CSS, JavaScript, Images)
+# Internationalization
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'America/New_York'
+USE_I18N = True
+USE_TZ = True
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = '/static'
 

@@ -47,7 +47,6 @@ class UserWithProfileCreationForm(UserCreationForm):
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         if phone:
-            print(">> Got the phone!")
             # Remove any non-digit characters
             phone = ''.join(filter(str.isdigit, phone))
 

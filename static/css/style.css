@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
+
 :root{
     /* Colors */
     --clr-light: 43, 41%, 96%;
@@ -66,8 +68,6 @@
 .fs-800 { font-size: var(--fs-800); }
 .fs-850 { font-size: var(--fs-850); }
 .fs-900 { font-size: var(--fs-900); }
-
-@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
 
 .ff-regular {
     font-family: "League Spartan", Georgia, Cambria, 'Times New Roman', Times, serif;

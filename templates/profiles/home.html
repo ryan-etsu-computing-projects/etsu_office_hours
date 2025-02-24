@@ -1,6 +1,63 @@
 {% extends 'base.html' %}
 {% load form_filters %}
 
+{% block extra_css %}
+<style>
+  .sort {
+    background-color: hsl(var(--clr-primary));
+    color:white!important;
+  }
+
+  .sort:hover {
+    background-color: hsl(var(--clr-primary-hover));
+  }
+
+  .sort:focus {
+    outline:none;
+  }
+  
+  .sort:after {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    content:"";
+    position: relative;
+    top:-10px;
+    right:-5px;
+  }
+
+  .sort.asc:after {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #fff;
+    content:"";
+    position: relative;
+    top:13px;
+    right:-5px;
+  }
+
+  .sort.desc:after {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #fff;
+    content:"";
+    position: relative;
+    top:-10px;
+    right:-5px;
+  }
+
+  ul { padding:0; list-style-type: none; }
+
+  li { list-style-type: none; }
+</style>
+{% endblock extra_css %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col">
@@ -8,198 +65,199 @@
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-8">
-        <form method="get" action="{% url 'profiles:home' %}" id="searchForm">
-            <div class="input-group">
-                <input style="background-color: #fffdf9;" type="text" id="mainSearch" class="form-control search" name="search"
-                    placeholder="Search by name, job title, department, or college..." value="{{ search_query }}">
-                <input type="hidden" name="classification" value="{{ classification_filter }}">
-                <input type="hidden" name="sort" value="{{ sort_direction }}">
-                <button class="btn btn-outline-secondary" type="submit">
-                    <i class="bi bi-search"></i>
-                </button>
-            </div>
-        </form>
-    </div>
-    <div class="col-md-4">
-        <div class="d-flex justify-content-end">
-            <!-- Classification Filter Dropdown -->
-            <div class="dropdown me-2">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    {% if classification_filter %}{{ classification_filter }}{% else %}All{% endif %}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="filterDropdown">
-                    <li><a class="dropdown-item {% if not classification_filter %}active{% endif %}" href="#" data-filter="">All</a></li>
-                    <li><a class="dropdown-item {% if classification_filter == 'Faculty' %}active{% endif %}" href="#" data-filter="Faculty">Faculty</a></li>
-                    <li><a class="dropdown-item {% if classification_filter == 'Staff' %}active{% endif %}" href="#" data-filter="Staff">Staff</a></li>
-                </ul>
-            </div>
-            
-            <!-- Sort Dropdown -->
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-sort-alpha-down{% if sort_direction == 'desc' %}-alt{% endif %}"></i>
-                    Sort
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                    <li><a class="dropdown-item {% if sort_direction == 'asc' %}active{% endif %}" href="#" data-sort="asc">
-                        <i class="bi bi-sort-alpha-down"></i> A to Z
-                    </a></li>
-                    <li><a class="dropdown-item {% if sort_direction == 'desc' %}active{% endif %}" href="#" data-sort="desc">
-                        <i class="bi bi-sort-alpha-down-alt"></i> Z to A
-                    </a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% if search_query or classification_filter %}
-<div class="row mb-3">
-    <div class="col">
-        <div class="alert alert-info d-flex justify-content-between align-items-center">
-            <div>
-                {% if total_results > 0 %}
-                    Found {{ total_results }} result{{ total_results|pluralize }} 
-                    {% if search_query %}for "<strong>{{ search_query }}</strong>"{% endif %}
-                    {% if classification_filter %}in <strong>{{ classification_filter }}</strong>{% endif %}
-                {% else %}
-                    No results found
-                    {% if search_query %}for "<strong>{{ search_query }}</strong>"{% endif %}
-                    {% if classification_filter %}in <strong>{{ classification_filter }}</strong>{% endif %}
-                {% endif %}
-            </div>
-            <a href="{% url 'profiles:home' %}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-x-circle"></i> Clear Filters
-            </a>
-        </div>
-    </div>
-</div>
-{% endif %}
-
 <div id="profiles-list">
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 list">
-        {% for profile in profiles %}
-            <div class="col">
-                <div class="card h-100" style="background-color: #fffdf9;">
-                    {% if profile.profile_image %}
-                        <img src="{{ profile.profile_image.url }}" class="card-img-top" alt="{{ profile.user.get_full_name }}"
-                            style="object-fit: cover; height: 30rem;">
-                    {% else %}
-                        <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center"
-                            style="height: 30rem;">
-                            <i class="bi bi-person-circle" style="font-size: 8rem;"></i>
-                        </div>
-                    {% endif %}
-                    <div class="card-body d-flex flex-column">
-                        <h4 class="card-title text-highlight-primary">
-                            {{ profile|print_preferred_name }}
-                            {% if profile.pronouns %}
-                                <span class="text-muted">({{ profile.pronouns }})</span>
-                            {% endif %}
-                            <a href="mailto:{{ profile.user.email }}" title="Email {{ profile|print_preferred_name }}" class="text-decoration-none" style="float: right;">
-                                <i class="bi bi-envelope"></i>
-                            </a>
-                        </h4>
-                        {% if profile.job_title %}
-                            <p class="card-text text-muted mb-0">{% newline_split_on_tokens profile.job_title '&,' %}</p>
-                        {% endif %}
-                        <hr>
-
-                        {% if profile.department or profile.college %}
-                            {% if profile.department %}
-                                <p class="card-text mb-2">{{ profile.department }}</p>
-                            {% else %}
-                                <p class="card-text mb-2">{{ profile.college }}</p>
-                            {% endif %}
-                        {% endif %}
-
-                        <div class="mt-auto">
-                            <a href="{% url 'profiles:profile_detail' profile.pk %}" class="btn bttn-primary w-100">View Profile</a>
-                        </div>
-                    </div>
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" action="{% url 'profiles:home' %}" id="searchForm">
+                <div class="input-group">
+                    <input style="background-color: #fffdf9;" type="text" id="mainSearch" class="form-control search" name="search"
+                        placeholder="Search by name, job title, department, or college..." value="{{ search_query }}">
+                    <input type="hidden" name="classification" value="{{ classification_filter }}">
+                    <input type="hidden" name="sort" value="{{ sort_direction }}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex justify-content-end">
+                <!-- Classification Filter Dropdown -->
+                <div class="dropdown me-2">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if classification_filter %}{{ classification_filter }}{% else %}All{% endif %}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+                        <li><a class="dropdown-item {% if not classification_filter %}active{% endif %}" href="#" data-filter="">All</a></li>
+                        <li><a class="dropdown-item {% if classification_filter == 'Faculty' %}active{% endif %}" href="#" data-filter="Faculty">Faculty</a></li>
+                        <li><a class="dropdown-item {% if classification_filter == 'Staff' %}active{% endif %}" href="#" data-filter="Staff">Staff</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Sort Dropdown -->
+                <div class="dropdown">
+                    <button class="btn sort" data-sort="name">Sort by name</button>
                 </div>
             </div>
-        {% empty %}
-            <div class="col-12 text-center py-5">
-                <h4 class="text-muted">No profiles found</h4>
-                {% if search_query %}
-                    <p>Try using different search terms or <a href="{% url 'profiles:home' %}">view all profiles</a></p>
-                {% endif %}
-            </div>
-        {% endfor %}
+        </div>
     </div>
 
-    <!-- Pagination Controls -->
-    {% if profiles.paginator.num_pages > 1 %}
-    <div class="row mt-4">
+    {% if search_query or classification_filter %}
+    <div class="row mb-3">
         <div class="col">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if profiles.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="First">
-                                <span aria-hidden="true">&laquo;&laquo;</span>
-                            </a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ profiles.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                <div>
+                    {% if total_results > 0 %}
+                        Found {{ total_results }} result{{ total_results|pluralize }} 
+                        {% if search_query %}for "<strong>{{ search_query }}</strong>"{% endif %}
+                        {% if classification_filter %}in <strong>{{ classification_filter }}</strong>{% endif %}
                     {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">&laquo;&laquo;</span>
-                        </li>
-                        <li class="page-item disabled">
-                            <span class="page-link">&laquo;</span>
-                        </li>
+                        No results found
+                        {% if search_query %}for "<strong>{{ search_query }}</strong>"{% endif %}
+                        {% if classification_filter %}in <strong>{{ classification_filter }}</strong>{% endif %}
                     {% endif %}
-
-                    {% for page_num in profiles.paginator.page_range %}
-                        {% if profiles.number == page_num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ page_num }}</span>
-                            </li>
-                        {% elif page_num > profiles.number|add:'-3' and page_num < profiles.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ page_num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if profiles.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ profiles.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ profiles.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Last">
-                                <span aria-hidden="true">&raquo;&raquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">&raquo;</span>
-                        </li>
-                        <li class="page-item disabled">
-                            <span class="page-link">&raquo;&raquo;</span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
+                </div>
+                <a href="{% url 'profiles:home' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear Filters
+                </a>
+            </div>
         </div>
     </div>
     {% endif %}
+
+    <div>
+        <ul class="list row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 list">
+            {% for profile in profiles %}
+                {% with profile|print_preferred_name as pref_name %}
+                <li class="col">
+                    <span class="name" style="display: none;">{{ profile.user.get_full_name }}</span>
+                    <div class="card h-100" style="background-color: #fffdf9;">
+                        {% if profile.profile_image %}
+                            <img src="{{ profile.profile_image.url }}" class="card-img-top" alt="{{ profile.user.get_full_name }}"
+                                style="object-fit: cover; height: 30rem;">
+                        {% else %}
+                            <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center"
+                                style="height: 30rem;">
+                                <i class="bi bi-person-circle" style="font-size: 8rem;"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h4 class="card-title text-highlight-primary">
+                                {{ pref_name }}
+                                {% if profile.pronouns %}
+                                    <span class="text-muted">({{ profile.pronouns }})</span>
+                                {% endif %}
+                                <a href="mailto:{{ profile.user.email }}" title="Email {{ profile|print_preferred_name }}" class="text-decoration-none" style="float: right;">
+                                    <i class="bi bi-envelope"></i>
+                                </a>
+                            </h4>
+                            {% if profile.job_title %}
+                                <p class="card-text text-muted mb-0">{% newline_split_on_tokens profile.job_title '&,' %}</p>
+                            {% endif %}
+                            <hr>
+
+                            {% if profile.department or profile.college %}
+                                {% if profile.department %}
+                                    <p class="card-text mb-2">{{ profile.department }}</p>
+                                {% else %}
+                                    <p class="card-text mb-2">{{ profile.college }}</p>
+                                {% endif %}
+                            {% endif %}
+
+                            <div class="mt-auto">
+                                <a href="{% url 'profiles:profile_detail' profile.pk %}" class="btn bttn-primary w-100">View Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% endwith %}
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <h4 class="text-muted">No profiles found</h4>
+                    {% if search_query %}
+                        <p>Try using different search terms or <a href="{% url 'profiles:home' %}">view all profiles</a></p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </ul>
+
+        <!-- Pagination Controls -->
+        {% if profiles.paginator.num_pages > 1 %}
+        <div class="row mt-4">
+            <div class="col">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if profiles.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ profiles.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">&laquo;&laquo;</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">&laquo;</span>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in profiles.paginator.page_range %}
+                            {% if profiles.number == page_num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% elif page_num > profiles.number|add:'-3' and page_num < profiles.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if profiles.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ profiles.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ profiles.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">&raquo;</span>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">&raquo;&raquo;</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let mainSearch = document.getElementById('mainSearch');
+    let profileOpts = {
+        valueNames: ['name'],
+        searchClass: false
+    }
+    let profilesList = new List('profiles-list', profileOpts);
+    console.log(profilesList);
 
     // Handle filter dropdown clicks
     document.querySelectorAll('[data-filter]').forEach(item => {
@@ -209,18 +267,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchForm = document.getElementById('searchForm');
             const classificationInput = searchForm.querySelector('input[name="classification"]');
             classificationInput.value = filter;
-            searchForm.submit();
-        });
-    });
-    
-    // Handle sort dropdown clicks
-    document.querySelectorAll('[data-sort]').forEach(item => {
-        item.addEventListener('click', event => {
-            event.preventDefault();
-            const sort = event.target.dataset.sort;
-            const searchForm = document.getElementById('searchForm');
-            const sortInput = searchForm.querySelector('input[name="sort"]');
-            sortInput.value = sort;
             searchForm.submit();
         });
     });

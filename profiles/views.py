@@ -116,19 +116,8 @@ def home(request):
 
 
     # Convert to list if it's a queryset
-    if hasattr(profiles_list, 'all'):
-        profiles_count = profiles_list.count()
-        # Apply sorting
-        if sort_direction == 'desc':
-            profiles_list = profiles_list.order_by('-user__first_name')
-            logger.debug('Results sorted descending')
-        else:  # asc
-            profiles_list = profiles_list.order_by('user__first_name')
-            logger.debug('Results sorted ascending')
-        profiles_list = list(profiles_list)
-    else:
-        logger.warning('Unable to sort the results because they are not a queryset')
-        profiles_count = len(profiles_list)
+    if hasattr(profiles_list, 'all'): profiles_list = list(profiles_list)
+    profiles_count = len(profiles_list)
 
     # Number of profiles per page
     per_page = 12

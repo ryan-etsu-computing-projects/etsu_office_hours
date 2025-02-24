@@ -87,7 +87,7 @@
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         {% if classification_filter %}{{ classification_filter }}{% else %}All{% endif %}
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+                    <ul class="dropdown-menu shadow" aria-labelledby="filterDropdown">
                         <li><a class="dropdown-item {% if not classification_filter %}active{% endif %}" href="#" data-filter="">All</a></li>
                         <li><a class="dropdown-item {% if classification_filter == 'Faculty' %}active{% endif %}" href="#" data-filter="Faculty">Faculty</a></li>
                         <li><a class="dropdown-item {% if classification_filter == 'Staff' %}active{% endif %}" href="#" data-filter="Staff">Staff</a></li>

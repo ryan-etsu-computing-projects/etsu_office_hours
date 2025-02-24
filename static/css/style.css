@@ -171,7 +171,7 @@
     color: hsl(var(--clr-secondary))!important;
     color: #212529!important;
     font-weight: 500!important;
-    transition-duration: 0.33s;
+    transition-duration: 0.29s;
 }
 
 .bttn-outline-edit:hover {

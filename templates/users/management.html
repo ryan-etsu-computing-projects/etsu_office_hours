@@ -12,7 +12,7 @@
 
             </div>
             <div class="btn-group">
-                <a href="/admin" class="btn bttn-warning">
+                <a href="/admin" target="_blank" class="btn bttn-warning">
                     <i class="bi bi-person-lock"></i> Django Admin
                 </a>
                 <a href="{% url 'users:create_user' %}" class="btn bttn-create">
@@ -147,7 +147,7 @@
                                                 </form>
                                             </li>
                                             <li>
-                                                <a class="dropdown-item" href="{% url 'admin:users_encrypteduser_change' user.id %}">
+                                                <a class="dropdown-item" href="{% url 'admin:users_encrypteduser_change' user.id %}" target="_blank">
                                                     Edit in Admin
                                                 </a>
                                             </li>

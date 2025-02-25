@@ -93,7 +93,6 @@
                         <li><a class="dropdown-item {% if classification_filter == 'Staff' %}active{% endif %}" href="#" data-filter="Staff">Staff</a></li>
                     </ul>
                 </div>
-                
                 <!-- Sort Dropdown -->
                 <div class="dropdown">
                     <button class="btn sort" data-sort="name">Sort by name</button>
@@ -252,6 +251,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let mainSearch = document.getElementById('mainSearch');
+    
     let profileOpts = {
         valueNames: ['name'],
         searchClass: false
@@ -275,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
         mainSearch.value = '';
     }
 
+    // wHE
     mainSearch.addEventListener('focus', (ev) => {
         clearSearch();
     });

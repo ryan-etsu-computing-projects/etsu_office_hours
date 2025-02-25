@@ -140,6 +140,7 @@ def home(request):
     return render(request, 'profiles/home.html', {
         'profiles': profiles,
         'search_query': search_query,
+        'classification_filter': classification_filter,
         'total_results': profiles_count,
     })
 

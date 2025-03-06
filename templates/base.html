@@ -19,7 +19,7 @@
         <div class="content-wrap">
             <nav class="navbar navbar-expand-lg navbar-light bg-etsu-yellow">
                 <div class="container">
-                    <a class="navbar-brand pt-3" href="{% url 'profiles:home' %}" id="navbarBrand" style="position: absolute;">
+                    <a class="navbar-brand pt-3" href="{% url 'profiles:home' %}" id="navbarBrand">
                         <img src="{% static 'img/etsu-logo-nav.png' %}" height="55" alt="ETSU logo">
                         <span class="fs-550 hide-when-small" style="color:#00043e;">&nbsp;Office Hours Directory</span>
                     </a>
@@ -31,7 +31,10 @@
                             {% if user.is_authenticated %}
                                 {% if user.is_staff %}
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{% url 'users:manage' %}">User Management</a>
+                                        <a class="nav-link" href="{% url 'users:manage' %}">
+                                            <i class="bi bi-people"></i>
+                                            User Management
+                                        </a>
                                     </li>
                                 {% endif %}
                                 <li class="nav-item">

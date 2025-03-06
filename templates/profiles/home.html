@@ -69,8 +69,8 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <form method="get" action="{% url 'profiles:home' %}" id="searchForm">
-                <div class="input-group">
-                    <input style="background-color: #fffdf9;" type="text" id="mainSearch" class="form-control search" name="search"
+                <div class="input-group mb-2">
+                    <input style="background-color: #fffdf9;" type="text" id="mainSearch" class="form-control search b-2" name="search"
                         placeholder="Search by name, job title, department, or college..." value="{{ search_query }}">
                     <input type="hidden" name="classification" value="{{ classification_filter }}">
                     <input type="hidden" name="sort" value="{{ sort_direction }}">

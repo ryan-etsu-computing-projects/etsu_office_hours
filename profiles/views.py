@@ -36,83 +36,49 @@ def home(request):
 
         # If we have tokens, search each one
         if tokens:
-            # Start with all profiles
-            token_results = profiles_list
+            all_profiles = list(UserProfile.objects.select_related('user').all())
+            filtered_profiles = []
 
-            # For each token, filter the results
-            for token in tokens:
-                # Create a filter for this token
-                token_filter = (
-                    # Unencrypted fields
-                    models.Q(user__first_name__icontains=token) |
-                    models.Q(user__last_name__icontains=token) |
-                    models.Q(user__email__icontains=token) |
+            for profile in all_profiles:
+                # For each profile, check if it matches all tokens
+                matches_all_tokens = True
 
-                    # Encrypted fields
-                    models.Q(job_title__icontains=token) |
-                    models.Q(department__icontains=token) |
-                    models.Q(college__icontains=token) |
-                    models.Q(honorific__icontains=token) |
-                    models.Q(preferred_name__icontains=token) |
+                for token in tokens:
+                    # Build a list of fields to check
+                    fields_to_check = [
+                        profile.user.first_name.lower(),
+                        profile.user.last_name.lower(),
+                        profile.user.email.lower(),
+                        getattr(profile, 'job_title', '').lower(),
+                        getattr(profile, 'department', '').lower(),
+                        getattr(profile, 'college', '').lower(),
+                        getattr(profile, 'honorific', '').lower(),
+                        getattr(profile, 'preferred_name', '').lower(),
+                    ]
 
                     # Special cases for department/college
-                    models.Q(department__icontains=f"Department of {token}") |
-                    models.Q(college__icontains=f"College of {token}")
-                )
+                    department = getattr(profile, 'department', '').lower()
+                    if department:
+                        fields_to_check.append(department.replace('department of ', ''))
 
-                # Filter the results with this token
-                token_results = token_results.filter(token_filter)
+                    college = getattr(profile, 'college', '').lower()
+                    if college:
+                        fields_to_check.append(college.replace('college of ', ''))
 
-            # Use the filtered results
-            profiles_list = token_results.distinct()
-            logger.debug(f"Tokenized search found {profiles_list.count()} results")
+                    # Check if any field matches this token
+                    token_match = any(token in field for field in fields_to_check if field)
 
-            # If no results from DB query, try Python filtering
-            if profiles_list.count() == 0:
-                logger.debug("No results from tokenized database query, trying Python filtering")
-                all_profiles = list(UserProfile.objects.select_related('user').all())
-                filtered_profiles = []
+                    if not token_match:
+                        matches_all_tokens = False
+                        break
 
-                for profile in all_profiles:
-                    # For each profile, check if it matches all tokens
-                    matches_all_tokens = True
+                # If the profile matches all tokens, add it to results
+                if matches_all_tokens:
+                    filtered_profiles.append(profile)
 
-                    for token in tokens:
-                        # Build a list of fields to check
-                        fields_to_check = [
-                            profile.user.first_name.lower(),
-                            profile.user.last_name.lower(),
-                            profile.user.email.lower(),
-                            getattr(profile, 'job_title', '').lower(),
-                            getattr(profile, 'department', '').lower(),
-                            getattr(profile, 'college', '').lower(),
-                            getattr(profile, 'honorific', '').lower(),
-                            getattr(profile, 'preferred_name', '').lower(),
-                        ]
-
-                        # Special cases for department/college
-                        department = getattr(profile, 'department', '').lower()
-                        if department:
-                            fields_to_check.append(department.replace('department of ', ''))
-
-                        college = getattr(profile, 'college', '').lower()
-                        if college:
-                            fields_to_check.append(college.replace('college of ', ''))
-
-                        # Check if any field matches this token
-                        token_match = any(token in field for field in fields_to_check if field)
-
-                        if not token_match:
-                            matches_all_tokens = False
-                            break
-
-                    # If the profile matches all tokens, add it to results
-                    if matches_all_tokens:
-                        filtered_profiles.append(profile)
-
-                # Use the Python-filtered results
-                profiles_list = filtered_profiles
-                logger.debug(f"Python filtering found {len(filtered_profiles)} results")
+            # Use the Python-filtered results
+            profiles_list = filtered_profiles
+            logger.debug(f"Python filtering found {len(filtered_profiles)} results")
 
 
     # Convert to list if it's a queryset

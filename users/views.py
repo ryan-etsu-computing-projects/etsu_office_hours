@@ -46,11 +46,34 @@ def user_management(request):
 
     # Apply search if provided
     if search_query:
-        users_list = users_list.filter(
-            models.Q(email__icontains=search_query) |
-            models.Q(first_name__icontains=search_query) |
-            models.Q(last_name__icontains=search_query)
-        )
+        # Split query into tokens
+        tokens = [token.strip().lower() for token in search_query.split() if token.strip()]
+        
+        all_users = list(EncryptedUser.objects.all())
+        filtered_users = []
+        
+        for user in all_users:
+            # For each profile, check if it matches all tokens
+            matches_all_tokens = True
+            for token in tokens:
+                fields_to_check = [
+                    user.first_name.lower(),
+                    user.last_name.lower(),
+                    user.email.lower(),
+                ]
+
+                # Check if any field matches this token
+                token_match = any(token in field for field in fields_to_check if field)
+                
+                if not token_match: matches_all_tokens = False; break
+            if matches_all_tokens:
+                filtered_users.append(user)
+
+        users_list = filtered_users
+
+    # Convert to list if it's a queryset
+    if hasattr(users_list, 'all'): users_list = list(users_list)
+    total_results = len(users_list)
 
     # Number of users per page (adjust as needed)
     per_page = 15
@@ -75,7 +98,7 @@ def user_management(request):
         'now': timezone.now(),
         'search_query': search_query,
         'status_filter': status_filter,
-        'total_results': users_list.count(),
+        'total_results': total_results,
     }
 
     return render(request, 'users/management.html', context)

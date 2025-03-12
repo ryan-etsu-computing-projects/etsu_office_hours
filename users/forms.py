@@ -99,7 +99,7 @@ class CSVUploadForm(forms.Form):
         
         try:
             # Read the CSV file
-            csv_data = csv_file.read().decode('utf-8')
+            csv_data = csv_file.read().decode('utf-8-sig')
             csv_file.seek(0)  # Reset file pointer
             
             # Parse the CSV
@@ -107,6 +107,8 @@ class CSVUploadForm(forms.Form):
             
             # Verify headers
             headers = set(reader.fieldnames if reader.fieldnames else [])
+            
+            print(headers)
             missing_fields = required_fields - headers
             if missing_fields:
                 raise ValidationError(f'Missing required columns: {", ".join(missing_fields)}')

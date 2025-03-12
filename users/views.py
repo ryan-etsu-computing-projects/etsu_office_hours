@@ -174,7 +174,7 @@ def upload_csv(request):
         form = CSVUploadForm(request.POST, request.FILES)
         if form.is_valid():
             csv_file = request.FILES['csv_file']
-            decoded_file = csv_file.read().decode('utf-8')
+            decoded_file = csv_file.read().decode('utf-8-sig')
             csv_data = csv.DictReader(io.StringIO(decoded_file))
             
             for row in csv_data:

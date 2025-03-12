@@ -1,3 +1,5 @@
+# SSL certs
+certs/*
 # Database migrations
 migrations/*
 # Stupid folder that appears with images for some reason

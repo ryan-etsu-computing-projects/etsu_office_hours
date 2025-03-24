@@ -35,6 +35,13 @@ def remove_prepended_junk(field, junk_to_remove):
         return field[junk_len:].lstrip()
     else:
         return field
+    
+@register.filter(name='office_location')
+def office_location(profile):
+    if profile.office_room:
+        return f"{profile.office_room} {profile.office_building}"
+    else:
+        return profile.office_building
 
 @register.filter(name='has_group')
 def has_group(user, group_name):

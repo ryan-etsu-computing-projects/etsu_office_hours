@@ -141,15 +141,20 @@
                             </div>
                         {% endif %}
                         <div class="card-body d-flex flex-column">
-                            <h4 class="card-title text-highlight-primary">
+                            <p class="card-title text-highlight-primary fs-450 ff-bold">
                                 {{ pref_name }}
                                 {% if profile.pronouns %}
-                                    <span class="text-muted">({{ profile.pronouns }})</span>
+                                    <span class="text-muted ff-regular">({{ profile.pronouns }})</span>
                                 {% endif %}
                                 <a href="mailto:{{ profile.user.email }}" title="Email {{ profile|print_preferred_name }}" class="text-decoration-none" style="float: right;">
                                     <i class="bi bi-envelope"></i>
                                 </a>
-                            </h4>
+                                {% if profile.office_building %}
+                                <a href="{% url 'profiles:profile_detail' profile.pk %}" title="Office: {{ profile|office_location }}" class="text-decoration-none" style="float: right;">
+                                    <i class="bi bi-geo-alt">&ensp;</i>
+                                </a>
+                                {% endif %}
+                            </p>
                             {% if profile.job_title %}
                                 <p class="card-text text-muted mb-0">{% newline_split_on_tokens profile.job_title '&,' %}</p>
                             {% endif %}
@@ -162,7 +167,6 @@
                                     <p class="card-text mb-2">{{ profile.college }}</p>
                                 {% endif %}
                             {% endif %}
-
                             <div class="mt-auto">
                                 <a href="{% url 'profiles:profile_detail' profile.pk %}" class="btn bttn-primary w-100">View Profile</a>
                             </div>
